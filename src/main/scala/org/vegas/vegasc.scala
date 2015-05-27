@@ -3,6 +3,7 @@ package org.vegas
 import org.vegas.compiler.{Compiler, CompilerWriter, FileReader, FileWriter, PassThru}
 import org.vegas.compiler.stage1.{Stage1Compiler, Stage1FileCompiler}
 import org.vegas.compiler.stage2.{Stage2Compiler, Stage2FileCompiler}
+import org.vegas.compiler.stageN.{StageNCompiler, StageNFileCompiler}
 
 object vegasc {
     val version = "0.0.0"
@@ -20,8 +21,9 @@ object vegasc {
 
     def compileFile(filename: String, options: Array[String]) {
          FileReader(filename) >>:
-         (if (options contains "--no-semicolons") PassThru() else Stage1Compiler()) >>:
-         Stage2Compiler() >>:
+         (if (options contains "--no-tags") PassThru() else Stage1Compiler()) >>:
+         (if (options contains "--no-semicolons") PassThru() else Stage2Compiler()) >>:
+         (if (options contains "--no-parse") PassThru() else StageNCompiler()) >>:
          FileWriter(filename)
     }
 
@@ -29,6 +31,7 @@ object vegasc {
         stage.stripPrefix("--") match {
             case "stage1" => Stage1FileCompiler(filename).compileToFile
             case "stage2" => Stage2FileCompiler(filename).compileToFile
+            case "stageN" => StageNFileCompiler(filename).compileToFile
             case _ => println(s"Cannot find compiler stage $stage")
         }
     }

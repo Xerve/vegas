@@ -1,4 +1,4 @@
-package org.vegas.compiler.stage2
+package org.vegas.compiler.stageN
 
 import org.parboiled2._
 import scala.collection.immutable.Seq
@@ -32,11 +32,11 @@ package object ast {
         def decompose(that: Expression) = "$" + identifier + " = " + that.eval
     }
 
-    case class ArrayPattern(val identifiers: List[String]) extends Pattern {
+    case class ArrayPattern(val identifiers: Seq[String]) extends Pattern {
         def decompose(that: Expression) = usesRef {
             "$ref" + refCount + " = " + that.eval + ";" +
             identifiers.zipWithIndex.map {
-                case (identifier, index) => identifier + " = $ref" + refCount + "[" + index + "];"
+                case (identifier, index) => "$" + identifier + " = $ref" + refCount + "[" + index + "]"
             }.mkString
         }
     }
@@ -64,7 +64,7 @@ package object ast {
     }
 
     case class ArrayLiteral(val elements: Seq[Expression]) extends Literal {
-        def eval = "array(" + elements.mkString(",") + ")"
+        def eval = "array(" + elements.map(_.eval).mkString(",") + ")"
     }
 
     case class ObjectLiteral(val elements: Seq[Tuple2[String, Expression]]) extends Literal {
@@ -76,11 +76,11 @@ package object ast {
     }
 }
 
-class Stage2Parser(val input: ParserInput) extends Parser {
+class StageNParser(val input: ParserInput) extends Parser {
     def Program = rule { Whitespace ~ zeroOrMore(Expression ~ ";" ~ Whitespace) ~ EOI }
 
     def Expression: Rule1[ast.Expression] = rule {
-        Binding | 
+        Binding |
         Literal
     }
 
@@ -89,7 +89,8 @@ class Stage2Parser(val input: ParserInput) extends Parser {
         NumberLiteral ~> (ast.NumberLiteral(_)) |
         StringLiteral ~> (ast.StringLiteral(_)) |
         BooleanLiteral ~> (ast.BooleanLiteral(_)) |
-        NullLiteral ~> (ast.NullLiteral(_))
+        NullLiteral ~> (ast.NullLiteral(_)) |
+        ArrayLiteral ~> (ast.ArrayLiteral(_))
     }
 
     def Keyword = rule {
@@ -122,11 +123,16 @@ class Stage2Parser(val input: ParserInput) extends Parser {
 
     def BooleanKeyword = rule { "true" | "yes" | "on" | "false" | "no" | "off" }
 
+    def ArrayLiteral = rule { '[' ~ Whitespace ~ (Expression + (',' ~ Whitespace)) ~ Whitespace ~ ']' }
+
     def IdentifierLiteral = rule { capture(Identifier) ~> (_.toString) }
 
     def Binding = rule { "let" ~ Whitespace ~ Pattern ~ Whitespace ~ "=" ~ Whitespace ~ Expression ~> (ast.Binding(_, _)) }
 
-    def Pattern = rule { IdentifierPattern ~> (ast.IdentifierPattern(_)) }
+    def Pattern = rule { IdentifierPattern ~> (ast.IdentifierPattern(_)) |
+                         ArrayPattern ~> (ast.ArrayPattern(_)) }
 
     def IdentifierPattern = rule { capture(Identifier) ~> (_.toString) }
+
+    def ArrayPattern = rule { "[" ~ (capture(Identifier) + ("," ~ Whitespace)) ~ "]" ~> (_.map(_.toString)) }
 }
