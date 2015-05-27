@@ -11,15 +11,19 @@ package object ast {
         f
     }
 
+    def isMacro(function: String) = false
+
     abstract class Expression {
         def eval: String
     }
 
-/*    case class FunctionCall(val args: List[Expression]) extends Expression {
-        def eval =
-            args(0).call(args.tail)
+    case class FunctionCall(val function: String, val args: Seq[Expression]) extends Expression {
+        def eval = isMacro(function) match {
+            case true => "WFTDIDYOUDO"
+            case false => function + "(" + args.map(_.eval).mkString(",") + ")"
+        }
     }
-*/
+
     case class Binding(val pattern: Pattern, val expression: Expression) extends Expression {
         def eval = pattern decompose expression
     }
@@ -36,8 +40,8 @@ package object ast {
         def decompose(that: Expression) = usesRef {
             "$ref" + refCount + " = " + that.eval + ";" +
             identifiers.zipWithIndex.map {
-                case (identifier, index) => "$" + identifier + " = $ref" + refCount + "[" + index + "]"
-            }.mkString
+                case (identifier, index) => "$" + identifier + " = $ref" + refCount + "[" + index + "];"
+            }.mkString.init
         }
     }
 
@@ -80,6 +84,7 @@ class StageNParser(val input: ParserInput) extends Parser {
     def Program = rule { Whitespace ~ zeroOrMore(Expression ~ ";" ~ Whitespace) ~ EOI }
 
     def Expression: Rule1[ast.Expression] = rule {
+        FunctionCall |
         Binding |
         Literal
     }
@@ -135,4 +140,8 @@ class StageNParser(val input: ParserInput) extends Parser {
     def IdentifierPattern = rule { capture(Identifier) ~> (_.toString) }
 
     def ArrayPattern = rule { "[" ~ (capture(Identifier) + ("," ~ Whitespace)) ~ "]" ~> (_.map(_.toString)) }
+
+    def FunctionCall = rule { Function ~ '(' ~ (Expression + (',' ~ Whitespace)) ~ Whitespace ~ ')' ~> (ast.FunctionCall(_, _)) }
+
+    def Function = rule { IdentifierLiteral }
 }

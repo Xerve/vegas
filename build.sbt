@@ -1,4 +1,4 @@
-name := "Vegas"
+name := "vegasc"
 
 version := "1.0"
 
