@@ -1,8 +1,9 @@
 package org.vegas
 
 import org.vegas.compiler.{Compiler, CompilerWriter, FileReader, FileWriter, PassThru}
-import org.vegas.compiler.stage1.{Stage1Compiler, Stage1FileCompiler}
-import org.vegas.compiler.stage2.{Stage2Compiler, Stage2FileCompiler}
+import org.vegas.compiler.braces.{BracesCompiler, BracesFileCompiler}
+import org.vegas.compiler.semicolon.{SemicolonCompiler, SemicolonFileCompiler}
+import org.vegas.compiler.comment.{CommentCompiler, CommentFileCompiler}
 import org.vegas.compiler.stageN.{StageNCompiler, StageNFileCompiler}
 
 object vegasc {
@@ -13,24 +14,28 @@ object vegasc {
             case 0 => printHelp
             case 1 if args(0).startsWith("-") => parseFlag(args(0))
             case 1 => compileFile(args(0), Array())
-            case 2 if args(0).startsWith("-") => compileStage(args(0), args(1))
-            case 2 => compileFile(args(0), args.tail)
-            case _ => println("Too many parameters specified!")
+            case 2 if args(0).startsWith("--stage-") => compileStage(args(0), args(1))
+            case _ => compileFile(args(0), args.tail)
         }
     }
 
     def compileFile(filename: String, options: Array[String]) {
-         FileReader(filename) >>:
-         (if (options contains "--no-tags") PassThru() else Stage1Compiler()) >>:
-         (if (options contains "--no-semicolons") PassThru() else Stage2Compiler()) >>:
-         (if (options contains "--no-parse") PassThru() else StageNCompiler()) >>:
-         FileWriter(filename)
+        def c(compiler: Compiler, switch: String) =
+            if (options contains switch) PassThru() else compiler
+
+        FileReader(filename) >>:
+        c(CommentCompiler(), "--no-comment") >>:
+        c(BracesCompiler(), "--no-braces") >>:
+        c(SemicolonCompiler(), "--no-semicolons") >>:
+        c(StageNCompiler(), "--no-parse") >>:
+        FileWriter(filename)
     }
 
     def compileStage(stage: String, filename: String) {
-        stage.stripPrefix("--") match {
-            case "stage1" => Stage1FileCompiler(filename).compileToFile
-            case "stage2" => Stage2FileCompiler(filename).compileToFile
+        stage.stripPrefix("--stage-") match {
+            case "comment" => CommentFileCompiler(filename).compileToFile
+            case "braces" => BracesFileCompiler(filename).compileToFile
+            case "semicolon" => SemicolonFileCompiler(filename).compileToFile
             case "stageN" => StageNFileCompiler(filename).compileToFile
             case _ => println(s"Cannot find compiler stage $stage")
         }

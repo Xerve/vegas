@@ -17,7 +17,7 @@ let [a, b] = myArray
 ```
 let m = if on then "ayy lmao" else "rawr"
 let k = 17
-k = 0 // ERROR! IMMUTIBILITY!
+k = 0 # ERROR! IMMUTIBILITY!
 ```
 
 # Developmenting

@@ -1,8 +1,8 @@
-package org.vegas.compiler.stage1
+package org.vegas.compiler.braces
 
 import org.vegas.compiler.{Compiler, FileCompiler}
 
-class Stage1Compiler extends Compiler {
+class BracesCompiler extends Compiler {
     def compile(source: String) =
         Some(source.lines.foldLeft(Tuple2(0, "")) ({ (program, line) =>
             val indentation = (line.indexWhere (_ != ' ') / 4)
@@ -16,10 +16,10 @@ class Stage1Compiler extends Compiler {
         })._2.drop(1))
 }
 
-object Stage1Compiler {
-    implicit lazy val compiler = new Stage1Compiler()
+object BracesCompiler {
+    implicit lazy val compiler = new BracesCompiler()
     def apply() = compiler
 }
 
-case class Stage1FileCompiler(val filename: String)
-    extends FileCompiler[Stage1Compiler]("stage1")
+case class BracesFileCompiler(val filename: String)
+    extends FileCompiler[BracesCompiler]("braces")

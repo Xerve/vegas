@@ -1,8 +1,8 @@
-package org.vegas.compiler.stage2
+package org.vegas.compiler.semicolon
 
 import org.vegas.compiler.{Compiler, FileCompiler}
 
-class Stage2Compiler extends Compiler {
+class SemicolonCompiler extends Compiler {
     def compile(source: String) =
         Some(source.lines.foldLeft("") ({ (program, line) =>
             line.trim.headOption match {
@@ -20,10 +20,10 @@ class Stage2Compiler extends Compiler {
         }) + ";")
 }
 
-object Stage2Compiler {
-    implicit lazy val compiler = new Stage2Compiler()
+object SemicolonCompiler {
+    implicit lazy val compiler = new SemicolonCompiler()
     def apply() = compiler
 }
 
-case class Stage2FileCompiler(val filename: String)
-    extends FileCompiler[Stage2Compiler]("stage2")
+case class SemicolonFileCompiler(val filename: String)
+    extends FileCompiler[SemicolonCompiler]("semicolon")
