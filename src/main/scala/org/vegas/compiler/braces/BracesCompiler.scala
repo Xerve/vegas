@@ -4,7 +4,7 @@ import org.vegas.compiler.{Compiler, FileCompiler}
 
 class BracesCompiler extends Compiler {
     def compile(source: String) =
-        Some(source.lines.foldLeft(Tuple2(0, "")) ({ (program, line) =>
+        Some((source + "\nnull").lines.foldLeft(Tuple2(0, "")) ({ (program, line) =>
             val indentation = (line.indexWhere (_ != ' ') / 4)
             val currentIndentation = program._1
             Tuple2(indentation, indentation match {

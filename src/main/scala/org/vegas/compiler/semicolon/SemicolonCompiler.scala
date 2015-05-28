@@ -6,16 +6,19 @@ class SemicolonCompiler extends Compiler {
     def compile(source: String) =
         Some(source.lines.foldLeft("") ({ (program, line) =>
             line.trim.headOption match {
-                case Some('.') => program + "\n" + line
+                case Some('.') => program + "\n" + line.stripSuffix(" ")
                 case Some(x) => program.trim.lastOption match {
-                    case Some('{') => program + "\n" + line
-                    case Some('+') => program + "\n" + line
-                    case Some('-') => program + "\n" + line
-                    case Some('=') => program + "\n" + line
-                    case Some(x) => program + ";\n" + line
-                    case None => program + line
+                    case Some('{') => program + "\n" + line.stripSuffix(" ")
+                    case Some('+') => program + "\n" + line.stripSuffix(" ")
+                    case Some('-') => program + "\n" + line.stripSuffix(" ")
+                    case Some('=') => program + "\n" + line.stripSuffix(" ")
+                    case Some(x) => """:(?=([^"\\]*(\\.|"([^"\\]*\\.)*[^"\\]*"))*[^"]*$)""".r.findFirstIn(program.split('\n').last) match {
+                            case Some(x) => program + "\n" + line.stripSuffix(" ")
+                            case None => program + ";\n" + line.stripSuffix(" ")
+                    }
+                    case None => program + line.stripSuffix(" ")
                 }
-                case None => program + line
+                case None => program + line.stripSuffix(" ")
             }
         }) + ";")
 }
