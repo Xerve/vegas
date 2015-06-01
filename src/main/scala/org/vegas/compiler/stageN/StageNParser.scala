@@ -3,7 +3,7 @@ package org.vegas.compiler.stageN
 import org.parboiled2._
 import scala.collection.immutable.Seq
 
-package object ast {
+sealed package object ast {
     var refCount = 0;
 
     def usesRef(f: => String) = {

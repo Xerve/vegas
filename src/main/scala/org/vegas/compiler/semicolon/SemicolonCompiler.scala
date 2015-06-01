@@ -4,7 +4,7 @@ import org.vegas.compiler.{Compiler, FileCompiler}
 
 class SemicolonCompiler extends Compiler {
     def compile(source: String) =
-        Some(source.lines.foldLeft("") ({ (program, line) =>
+        Some((source.lines.foldLeft("") ({ (program, line) =>
             line.trim.headOption match {
                 case Some('.') => program + "\n" + line.stripSuffix(" ")
                 case Some(x) => program.trim.lastOption match {
@@ -20,7 +20,7 @@ class SemicolonCompiler extends Compiler {
                 }
                 case None => program + line.stripSuffix(" ")
             }
-        }) + ";")
+        }) + ";").replaceAllLiterally(";;", ";"))
 }
 
 object SemicolonCompiler {
