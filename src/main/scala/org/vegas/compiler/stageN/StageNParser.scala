@@ -3,7 +3,7 @@ package org.vegas.compiler.stageN
 import org.parboiled2._
 import scala.collection.immutable.Seq
 
-sealed package object ast {
+package object ast {
     var refCount = 0;
 
     def usesRef(f: => String) = {
@@ -141,7 +141,7 @@ class StageNParser(val input: ParserInput) extends Parser {
 
     def ObjectLiteral = rule { '{' ~ Whitespace ~ (ObjectAttribute + (',' ~ Whitespace)) ~ Whitespace ~ '}' }
 
-    def ObjectAttribute = rule { StringLiteral ~ Whitespace ~ ':' ~ Whitespace ~ Expression ~> (Tuple2(_, _)) }
+    def ObjectAttribute = rule { (capture(Identifier) | StringLiteral) ~ Whitespace ~ ':' ~ Whitespace ~ Expression ~> (Tuple2(_, _)) }
 
     def IdentifierLiteral = rule { capture(Identifier) ~> (ast.IdentifierLiteral(_)) }
 
