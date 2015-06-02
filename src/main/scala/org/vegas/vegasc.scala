@@ -1,27 +1,31 @@
 package org.vegas
 
-import org.vegas.compiler.{Compiler, CompilerWriter, FileReader, FileWriter, PassThru}
+import org.vegas.compiler.{Compiler, CompilerOptions, FileReader, FileWriter, PassThru}
 import org.vegas.compiler.braces.{BracesCompiler, BracesFileCompiler}
 import org.vegas.compiler.semicolon.{SemicolonCompiler, SemicolonFileCompiler}
 import org.vegas.compiler.comment.{CommentCompiler, CommentFileCompiler}
 import org.vegas.compiler.stageN.{StageNCompiler, StageNFileCompiler}
 
-object vegasc {
+object vegasc extends App {
     val version = "0.0.0"
 
-    def main(args: Array[String]) {
-        args.length match {
-            case 0 => printHelp
-            case 1 if args(0).startsWith("-") => parseFlag(args(0))
-            case 1 => compileFile(args(0), Array())
-            case 2 if args(0).startsWith("--stage-") => compileStage(args(0), args(1))
-            case _ => compileFile(args(0), args.tail)
-        }
+    implicit val options = CompilerOptions(args)
+                  .alias("v", "version")
+                  .description("version", "Prints the version number")
+                  .alias("h", "help")
+                  .description("help", "Prints help")
+
+    args.length match {
+        case 0 => options.printHelp
+        case 1 if args(0).startsWith("-") => parseFlag(args(0))
+        case 1 => compileFile(args(0))
+        case 2 if args(0).startsWith("--stage-") => compileStage(args(0), args(1))
+        case _ => compileFile(args(0))
     }
 
-    def compileFile(filename: String, options: Array[String]) {
+    def compileFile(filename: String)(implicit options: CompilerOptions) {
         def c(compiler: Compiler, switch: String) =
-            if (options contains switch) PassThru() else compiler
+            if (options hasFlag switch) PassThru() else compiler
 
         FileReader(filename) >>:
         c(CommentCompiler(), "--no-comment") >>:
@@ -41,27 +45,13 @@ object vegasc {
         }
     }
 
-    def parseFlag(flag: String) =
+    def parseFlag(flag: String)(implicit options: CompilerOptions) =
         flag match {
             case "-v" | "--version" => printVersion
-            case "-h" | "--help" => printHelp
+            case "-h" | "--help" => options.printHelp
             case _ => println(s"Unknown flag: $flag")
         }
 
     def printVersion =
         println(s"Vegas Compiler $version")
-
-    def printHelp =
-        println(s"Vegas Compiler $version\n" +
-            "Usage: vegasc [opt] [filename]\n" +
-            "opts:\n" +
-            "  --stage2  => use the second stage compiler\n" +
-            "              outputs filename.stage2.vegas\n" +
-            "\n" +
-            "  -h\n" +
-            "  --help    => print this message\n" +
-            "\n" +
-            "  -v\n" +
-            "  --version => prints the version number"
-        )
 }

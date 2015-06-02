@@ -1,8 +1,10 @@
 package org.vegas.compiler
 
 import java.io.{PrintWriter, File}
+import org.vegas.vegasc
 
 abstract class Compiler {
+    val options = vegasc.options
     def compile(source: String): Option[String]
 
     def >>:(that: String) = compile(that)

@@ -2,26 +2,27 @@ package org.vegas.compiler.stageN
 
 import org.parboiled2._
 import scala.collection.immutable.Seq
+import scala.collection.mutable.Stack
 
-package object ast {
+object ast {
     var refCount = 0;
+    var scope = Stack[String]()
 
     def usesRef(f: => String) = {
         refCount += 1
         f
     }
 
-    def isMacro(function: IdentifierLiteral) = false
-
     abstract class Expression {
         def eval: String
     }
 
+    object NullExpression extends Expression {
+        def eval = ""
+    }
+
     case class FunctionCall(val function: IdentifierLiteral, val args: Seq[Expression]) extends Expression {
-        def eval = isMacro(function) match {
-            case true => "WFTDIDYOUDO"
-            case false => function.eval + "(" + args.map(_.eval).mkString(",") + ")"
-        }
+        def eval = function.eval + "(" + args.map(_.eval).mkString(",") + ")"
     }
 
     case class Binding(val pattern: Pattern, val expression: Expression) extends Expression {
@@ -86,10 +87,34 @@ package object ast {
         FunctionCall(IdentifierLiteral(identifiers.map(_.eval.tail).mkString(".")), Seq(arg))
 }
 
+object hint {
+    def apply(name: String, args: Seq[String]) =
+        name match {
+            case "scope" => scope(args)
+            case "endscope" => endscope(args)
+            case _ => ast.NullExpression
+        }
+
+    def scope(args: Seq[String]) = {
+        args.headOption match {
+            case Some(arg) => ast.scope push arg
+            case None => None
+        }
+
+        ast.NullExpression
+    }
+
+    def endscope(args: Seq[String]) = {
+        ast.scope.pop
+        ast.NullExpression
+    }
+}
+
 class StageNParser(val input: ParserInput) extends Parser {
     def Program = rule { Whitespace ~ zeroOrMore(Expression ~ ";" ~ Whitespace) ~ EOI }
 
     def Expression: Rule1[ast.Expression] = rule {
+        CompilerHint |
         FunctionCall |
         Binding |
         Literal |
@@ -161,11 +186,11 @@ class StageNParser(val input: ParserInput) extends Parser {
         ExplicitFunctionCall
     }
 
-    def ExplicitFunctionCall = rule { Function ~ '(' ~ (Expression * (',' ~ Whitespace)) ~ Whitespace ~ ')' ~> (ast.FunctionCall(_, _)) }
+    def ExplicitFunctionCall = rule { IdentifierLiteral ~ '(' ~ (Expression * (',' ~ Whitespace)) ~ Whitespace ~ ')' ~> (ast.FunctionCall(_, _)) }
 
     def ImplicitFunctionCall = rule {
         oneOrMore(IdentifierLiteral ~ ' ') ~ (Expression + (',' ~ Whitespace)) ~> (ast.implicitCallToFunction(_, _))
     }
 
-    def Function = rule { IdentifierLiteral }
+    def CompilerHint = rule { "#[" ~ capture(oneOrMore(CharPredicate.AlphaNum)) ~ ']' ~ Whitespace ~ (('<' ~ capture(oneOrMore(CharPredicate.AlphaNum)) ~ '>') * Whitespace) ~> (hint(_, _)) }
 }
