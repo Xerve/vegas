@@ -6,7 +6,7 @@ import scala.collection.mutable.Stack
 
 object ast {
     var refCount = 0;
-    var scope = Stack[String]()
+    val scope = Stack[String]()
 
     def usesRef(f: => String) = {
         refCount += 1

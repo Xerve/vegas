@@ -2,17 +2,10 @@ package org.vegas.compiler.scope
 
 import scala.collection.immutable.{Seq, Map}
 
-type Scope = Seq[String]
-
 case class ScopeNode(val children: Seq[ScopeNode], val nodes: Map[String, String]) {
-    def apply(node: Scope) =
+    def apply(node: Seq[String]): Option[String] =
         nodes.get(node.head) match {
-            case Some(t) => t
-            case None => children.foldLeft(None) { (prev, scope) =>
-                prev match {
-                    case Some(t) => prev
-                    case None => scope(node.tail)
-                }
-            }
+            case Some(t) => Some(t)
+            case None => children.map(_(node.tail)).reduce(_ orElse _)
         }
 }
