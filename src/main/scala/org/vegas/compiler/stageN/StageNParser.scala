@@ -4,112 +4,6 @@ import org.parboiled2._
 import scala.collection.immutable.Seq
 import scala.collection.mutable.Stack
 
-object ast {
-    var refCount = 0;
-    val scope = Stack[String]()
-
-    def usesRef(f: => String) = {
-        refCount += 1
-        f
-    }
-
-    abstract class Expression {
-        def eval: String
-    }
-
-    object NullExpression extends Expression {
-        def eval = ""
-    }
-
-    case class FunctionCall(val function: IdentifierLiteral, val args: Seq[Expression]) extends Expression {
-        def eval = function.eval + "(" + args.map(_.eval).mkString(",") + ")"
-    }
-
-    case class Binding(val pattern: Pattern, val expression: Expression) extends Expression {
-        def eval = pattern decompose expression
-    }
-
-    abstract class Pattern {
-        def decompose(that: Expression): String
-    }
-
-    case class IdentifierPattern(val identifier: IdentifierLiteral) extends Pattern {
-        def decompose(that: Expression) = identifier.eval + " = " + that.eval
-    }
-
-    case class ArrayPattern(val identifiers: Seq[String]) extends Pattern {
-        def decompose(that: Expression) = usesRef {
-            "$ref" + refCount + " = " + that.eval + ";" +
-            identifiers.zipWithIndex.map {
-                case (identifier, index) => "$" + identifier + " = $ref" + refCount + "[" + index + "];"
-            }.mkString.init
-        }
-    }
-
-    abstract class Literal extends Expression
-
-    case class NumberLiteral(val value: String) extends Literal {
-        def eval = value
-    }
-
-    case class StringLiteral(val value: String) extends Literal {
-        def eval = "\"" + value + "\""
-    }
-
-    case class BooleanLiteral(val value: String) extends Literal {
-        def eval = value match {
-            case "true" | "yes" | "on" => "true"
-            case "false" | "no" | "off" => "false"
-            case _ => "null"
-        }
-    }
-
-    case class NullLiteral(val value: String) extends Literal {
-        def eval = "null"
-    }
-
-    case class ArrayLiteral(val elements: Seq[Expression]) extends Literal {
-        def eval = "array(" + elements.map(_.eval).mkString(",") + ")"
-    }
-
-    case class ObjectLiteral(val elements: Seq[Tuple2[String, Expression]]) extends Literal {
-        def eval = "array(" + elements.map({ case (key, value) => "\"" + key + "\" => " + value.eval }).mkString(",") + ")"
-    }
-
-    case class IdentifierLiteral(val identifier: String) extends Literal {
-        def eval = "$" + identifier.replaceAllLiterally(".", "->")
-    }
-
-    def implicitCallToFunction(identifiers: Seq[IdentifierLiteral], args: Seq[Expression]) =
-        FunctionCall(IdentifierLiteral(identifiers.map(_.eval.tail).mkString(".")), args)
-
-    def implicitCallToFunction(identifiers: Seq[IdentifierLiteral], arg: IdentifierLiteral) =
-        FunctionCall(IdentifierLiteral(identifiers.map(_.eval.tail).mkString(".")), Seq(arg))
-}
-
-object hint {
-    def apply(name: String, args: Seq[String]) =
-        name match {
-            case "scope" => scope(args)
-            case "endscope" => endscope(args)
-            case _ => ast.NullExpression
-        }
-
-    def scope(args: Seq[String]) = {
-        args.headOption match {
-            case Some(arg) => ast.scope push arg
-            case None => None
-        }
-
-        ast.NullExpression
-    }
-
-    def endscope(args: Seq[String]) = {
-        ast.scope.pop
-        ast.NullExpression
-    }
-}
-
 class StageNParser(val input: ParserInput) extends Parser {
     def Program = rule { Whitespace ~ zeroOrMore(Expression ~ ";" ~ Whitespace) ~ EOI }
 
@@ -166,20 +60,23 @@ class StageNParser(val input: ParserInput) extends Parser {
 
     def ObjectLiteral = rule { '{' ~ Whitespace ~ (ObjectAttribute + (',' ~ Whitespace)) ~ Whitespace ~ '}' }
 
-    def ObjectAttribute = rule { (capture(Identifier) | StringLiteral) ~ Whitespace ~ ':' ~ Whitespace ~ Expression ~> (Tuple2(_, _)) }
+    def ObjectAttribute = rule { (capture(Identifier) | StringLiteral) ~ Whitespace ~ "=>" ~ Whitespace ~ Expression ~> (Tuple2(_, _)) }
 
     def IdentifierLiteral = rule { capture(Identifier) ~> (ast.IdentifierLiteral(_)) }
 
     def Binding = rule { "let" ~ Whitespace ~ Pattern ~ Whitespace ~ "=" ~ Whitespace ~ Expression ~> (ast.Binding(_, _)) }
 
     def Pattern = rule {
-        IdentifierPattern ~> (ast.IdentifierPattern(_)) |
-        ArrayPattern ~> (ast.ArrayPattern(_))
+        IdentifierPattern |
+        ArrayPattern
     }
 
-    def IdentifierPattern = rule { IdentifierLiteral }
+    def IdentifierPattern = rule {
+        "mut" ~ Whitespace ~ IdentifierLiteral ~ optional(":" ~ Whitespace ~ capture(Identifier)) ~> (ast.IdentifierPattern(_, _, true)) |
+        IdentifierLiteral ~ optional(":" ~ Whitespace ~ capture(Identifier)) ~> (ast.IdentifierPattern(_, _, false))
+    }
 
-    def ArrayPattern = rule { "[" ~ (capture(Identifier) + ("," ~ Whitespace)) ~ "]" ~> (_.map(_.toString)) }
+    def ArrayPattern = rule { "[" ~ (IdentifierPattern + ("," ~ Whitespace)) ~ "]" ~> (ast.ArrayPattern(_)) }
 
     def FunctionCall = rule {
         ImplicitFunctionCall |

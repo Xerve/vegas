@@ -1,0 +1,27 @@
+package org.vegas.compiler.stageN
+
+import scala.collection.immutable.Seq
+import scala.collection.mutable.Stack
+
+object hint {
+    def apply(name: String, args: Seq[String]) =
+        name match {
+            case "scope" => scope(args)
+            case "endscope" => endscope(args)
+            case _ => ast.NullExpression
+        }
+
+    def scope(args: Seq[String]) = {
+        args.headOption match {
+            case Some(arg) => ast.scope push arg
+            case None => None
+        }
+
+        ast.NullExpression
+    }
+
+    def endscope(args: Seq[String]) = {
+        ast.scope.pop
+        ast.NullExpression
+    }
+}
