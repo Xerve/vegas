@@ -1,13 +1,13 @@
 package org.vegas.compiler.stageN
 
-import org.vegas.types.VType
+import org.vegas.compiler.VType
 import scala.collection.immutable.Seq
 import scala.collection.mutable.Stack
 
 package object ast {
     var refCount = 0;
     val scope = Stack[String]()
-    val tree = ScopeTree()
+    val types = Scope()
 
     def usesRef(f: String => String) = {
         refCount += 1
@@ -20,6 +20,7 @@ package object ast {
 
     object NullExpression extends Expression {
         def eval = ""
+        def vtype = "null"
     }
 
     case class FunctionCall(val function: IdentifierLiteral, val args: Seq[Expression]) extends Expression {
@@ -36,7 +37,7 @@ package object ast {
 
     case class IdentifierPattern(val identifier: IdentifierLiteral, val t: Option[String], val mut: Boolean) extends Pattern {
         t match {
-            case Some(vtype) => tree.add((scope :+ identifier.eval).mkString("\\"), VType(vtype), mut)
+            case Some(vtype) => types.add((scope :+ identifier.eval).mkString("\\"), vtype, mut)
             case None => Unit
         }
 

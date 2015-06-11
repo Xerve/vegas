@@ -1,25 +1,25 @@
 package org.vegas.compiler.stageN
 
-import org.vegas.types.VType
+import org.vegas.compiler.VType
 import scala.collection.mutable.Map
 
 sealed case class Node(val vtype: VType, val mut: Boolean)
 
-class ScopeTree {
+class Scope {
     val nodes: Map[String, Node] = Map()
 
-    def add(node: String, vtype: VType, mut: Boolean = false) {
+    def add(node: String, value: String, mut: Boolean = false) {
         nodes get node match {
             case Some(vnode) =>
                 if (!vnode.mut) println("TRYING TO REASSAIGN IMMUTABLE VAR")
-                if (vnode.vtype != vtype) println("TRYING TO ASSAIGN WITHOUT MATCHING TYPES")
-            case None => nodes += node -> Node(vtype, mut)
+                if (vnode.vtype != VType(value)) println("TRYING TO ASSAIGN WITHOUT MATCHING TYPES")
+            case None => nodes += node -> Node(VType getType value, mut)
         }
     }
 
     def apply(node: String) = nodes get node
 }
 
-object ScopeTree {
-    def apply() = new ScopeTree()
+object Scope {
+    def apply() = new Scope()
 }
