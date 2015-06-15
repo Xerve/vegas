@@ -12,7 +12,7 @@ class SemicolonCompiler extends Compiler {
                     case Some('+') => program + "\n" + line.stripSuffix(" ")
                     case Some('-') => program + "\n" + line.stripSuffix(" ")
                     case Some('=') => program + "\n" + line.stripSuffix(" ")
-                    case Some(x) => """=>(?=([^"\\]*(\\.|"([^"\\]*\\.)*[^"\\]*"))*[^"]*$)""".r.findFirstIn(program.split('\n').last) match {
+                    case Some(x) => """:(?=([^"\\]*(\\.|"([^"\\]*\\.)*[^"\\]*"))*[^"]*$)""".r.findFirstIn(program.split('\n').last) match {
                             case Some(x) => program + "\n" + line.stripSuffix(" ")
                             case None => program + ";\n" + line.stripSuffix(" ")
                     }

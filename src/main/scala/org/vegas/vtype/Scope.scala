@@ -1,6 +1,5 @@
-package org.vegas.compiler.stageN
+package org.vegas.vtype
 
-import org.vegas.compiler.VType
 import scala.collection.mutable.Map
 
 sealed case class Node(val vtype: VType, val mut: Boolean)

@@ -1,5 +1,6 @@
 package org.vegas.compiler.stageN
 
+import org.vegas.vtype.ast
 import scala.collection.immutable.Seq
 import scala.collection.mutable.Stack
 

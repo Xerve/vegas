@@ -1,5 +1,6 @@
 package org.vegas.compiler.stageN
 
+import org.vegas.vtype.ast
 import org.parboiled2._
 import scala.collection.immutable.Seq
 import scala.collection.mutable.Stack
@@ -38,7 +39,7 @@ class StageNParser(val input: ParserInput) extends Parser {
         zeroOrMore(CharPredicate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"))
     }
 
-    def Whitespace = rule { zeroOrMore(CharPredicate(" \n\r\t\f")) }
+    def Whitespace = rule { quiet(zeroOrMore(CharPredicate(" \n\r\t\f"))) }
 
     def NumberLiteral = rule { capture(Digits) ~> (_.toString) }
 
@@ -60,7 +61,7 @@ class StageNParser(val input: ParserInput) extends Parser {
 
     def ObjectLiteral = rule { '{' ~ Whitespace ~ (ObjectAttribute + (',' ~ Whitespace)) ~ Whitespace ~ '}' }
 
-    def ObjectAttribute = rule { (capture(Identifier) | StringLiteral) ~ Whitespace ~ "=>" ~ Whitespace ~ Expression ~> (Tuple2(_, _)) }
+    def ObjectAttribute = rule { (capture(Identifier) | StringLiteral) ~ Whitespace ~ atomic(":") ~ Whitespace ~ Expression ~> (Tuple2(_, _)) }
 
     def IdentifierLiteral = rule { capture(Identifier) ~> (ast.IdentifierLiteral(_)) }
 

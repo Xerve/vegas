@@ -5,6 +5,7 @@ import org.vegas.compiler.braces.{BracesCompiler, BracesFileCompiler}
 import org.vegas.compiler.semicolon.{SemicolonCompiler, SemicolonFileCompiler}
 import org.vegas.compiler.comment.{CommentCompiler, CommentFileCompiler}
 import org.vegas.compiler.stageN.{StageNCompiler, StageNFileCompiler}
+import org.vegas.prelude.Prelude
 
 object vegasc extends App {
     val version = "0.0.0"
@@ -23,7 +24,9 @@ object vegasc extends App {
         case _ => compileFile(args(0))
     }
 
-    def compileFile(filename: String)(implicit options: CompilerOptions) {
+    Prelude.init
+
+    def compileFile(filename: String) {
         def c(compiler: Compiler, switch: String) =
             if (options hasFlag switch) PassThru() else compiler
 
@@ -45,7 +48,7 @@ object vegasc extends App {
         }
     }
 
-    def parseFlag(flag: String)(implicit options: CompilerOptions) =
+    def parseFlag(flag: String) =
         flag match {
             case "-v" | "--version" => printVersion
             case "-h" | "--help" => options.printHelp

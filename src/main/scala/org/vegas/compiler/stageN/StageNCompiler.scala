@@ -1,6 +1,7 @@
 package org.vegas.compiler.stageN
 
 import org.vegas.compiler.{Compiler, FileCompiler}
+import org.vegas.vtype.ast
 import org.parboiled2.ParseError
 import scala.util.{Success, Failure}
 

@@ -1,6 +1,5 @@
-package org.vegas.compiler.stageN
+package org.vegas.vtype
 
-import org.vegas.compiler.VType
 import scala.collection.immutable.Seq
 import scala.collection.mutable.Stack
 
@@ -16,11 +15,11 @@ package object ast {
 
     abstract class Expression {
         def eval: String
+        val vtype: VType = VAny
     }
 
     object NullExpression extends Expression {
         def eval = ""
-        def vtype = "null"
     }
 
     case class FunctionCall(val function: IdentifierLiteral, val args: Seq[Expression]) extends Expression {
