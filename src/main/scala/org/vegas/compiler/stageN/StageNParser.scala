@@ -61,7 +61,7 @@ class StageNParser(val input: ParserInput) extends Parser {
 
     def ObjectLiteral = rule { '{' ~ Whitespace ~ (ObjectAttribute + (',' ~ Whitespace)) ~ Whitespace ~ '}' }
 
-    def ObjectAttribute = rule { (capture(Identifier) | StringLiteral) ~ Whitespace ~ atomic(":") ~ Whitespace ~ Expression ~> (Tuple2(_, _)) }
+    def ObjectAttribute = rule { (capture(Identifier) | StringLiteral) ~ Whitespace ~ atomic("=>") ~ Whitespace ~ Expression ~> (Tuple2(_, _)) }
 
     def IdentifierLiteral = rule { capture(Identifier) ~> (ast.IdentifierLiteral(_)) }
 

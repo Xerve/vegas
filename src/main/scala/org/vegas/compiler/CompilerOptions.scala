@@ -3,14 +3,14 @@ package org.vegas.compiler
 import scala.collection.mutable.Map
 
 case class CompilerOptions(val args: Array[String]) {
-    val shortFlag = """-(\w)""".r
-    val longFlag = """--([\w-]+)""".r
+    val shortFlag = """-(\w)"""
+    val longFlag = """--([\w-]+)"""
 
     val aliases: Map[String, String] = Map()
     val reverseAliases: Map[String, String] = Map()
     val defaults: Map[String, String] = Map()
     val descriptions: Map[String, String] = Map()
-    lazy val flags: Map[String, String] = parseFlags()
+    lazy val flags: scala.collection.immutable.Map[String, Option[String]] = parseFlags()
 
     protected def chain(f: => Unit) = {
         f
@@ -30,31 +30,25 @@ case class CompilerOptions(val args: Array[String]) {
         descriptions += (flag -> desc)
     }
 
-    def parseFlags() = args.foldLeft(Tuple2[Map[String, String], Option[String]](Map(), None)) { (f, arg) =>
-        f._2 match {
-            case Some(setFlag) => (f._1 + (setFlag -> (arg match {
-                case _ if arg.startsWith("-") => defaults.get(setFlag) match {
-                    case Some(default) => default
-                    case None => ""
-                }
-                case _ => arg
-            }))) -> None
-            case None => f._1 -> Some(arg match {
-                case shortFlag(flag) => aliases.get(flag) match {
-                    case Some(alias) => alias
-                    case None => flag
-                }
-                case longFlag(flag) => flag
-                case _ => ""
-            })
-        }
-    }._1
+    def parseFlags() = {
+        def isFlag(arg: String) = (arg matches """-(\w)""") || (arg matches """--([\w-]+)""")
+
+        val flags = (for (arg <- args.sliding(2)
+            if isFlag(arg.head)
+        ) yield arg.lastOption match {
+            case Some(flag) => arg.head -> (if (isFlag(flag)) None else Some(flag))
+            case None => arg.head -> None
+        }).toMap
+
+        flags + (args.last -> None)
+    }
 
     def apply(flag: String) = flags get flag
 
     def hasFlag(flag: String) = flags contains flag
 
     override def toString = "Options given:\n    " + flags.mkString("\n    ")
+
     def printHelp { println(
         "Usage:\n" +
         descriptions.map { case (flag, text) =>
