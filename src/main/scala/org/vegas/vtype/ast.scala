@@ -35,10 +35,7 @@ package object ast {
     }
 
     case class IdentifierPattern(val identifier: IdentifierLiteral, val t: Option[String], val mut: Boolean) extends Pattern {
-        t match {
-            case Some(vtype) => types.add((scope :+ identifier.eval).mkString("\\"), vtype, mut)
-            case None => Unit
-        }
+        types.add((scope :+ identifier.eval).mkString("\\"), t.map(VType(_)), mut)
 
         def decompose(that: Expression) = identifier.eval + " = " + that.eval
         def eval = identifier.eval
