@@ -13,6 +13,7 @@ class SemicolonCompiler extends Compiler {
                     case Some('-') => program + "\n" + line.stripSuffix(" ")
                     case Some('=') => program + "\n" + line.stripSuffix(" ")
                     case Some(',') => program + "\n" + line.stripSuffix(" ")
+                    case Some(_) => program + ";\n" + line.stripSuffix(" ")
                     case None => program + line.stripSuffix(" ")
                 }
                 case None => program + line.stripSuffix(" ")

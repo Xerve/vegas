@@ -35,10 +35,14 @@ package object ast {
     }
 
     case class IdentifierPattern(val identifier: IdentifierLiteral, val t: Option[String], val mut: Boolean) extends Pattern {
-        types.add((scope :+ identifier.eval).mkString("\\"), t.map(VType(_)), mut)
+        types.add((scope :+ identifier.eval).mkString("\\"), t.map(VType getType _), mut)
 
-        def decompose(that: Expression) = identifier.eval + " = " + that.eval
         def eval = identifier.eval
+        def decompose(that: Expression) = {
+            types.add((scope :+ identifier.eval).mkString("\\"), Some(that.vtype))
+            identifier.eval + " = " + that.eval
+        }
+
     }
 
     case class ArrayPattern(val identifiers: Seq[IdentifierPattern]) extends Pattern {
