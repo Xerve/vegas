@@ -9,7 +9,9 @@ object log {
         _log += code -> msg
     }
 
-    override def toString = _log.map({ case (code, msg) =>
-        s"$code ->\n    $msg"
-    }).mkString("\n")
+    override def toString =
+        "Log:\n" +
+        _log.map({ case (code, msg) =>
+            if (msg != "") s"$code ->\n    $msg" else code
+        }).mkString("\n")
 }

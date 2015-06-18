@@ -22,6 +22,7 @@ abstract class VType {
             }
         }
 
+    override def toString = typename
 }
 
 object VType {

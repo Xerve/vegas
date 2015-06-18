@@ -38,7 +38,8 @@ object vegasc extends App {
         c(StageNCompiler(), "--no-parse") >>:
         FileWriter(filename)
 
-        println(ast.types.nodes)
+        println(ast.types)
+        println("")
         println(log)
     }
 

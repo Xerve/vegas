@@ -4,17 +4,25 @@ import org.parboiled2.Parser
 import org.vegas.log
 import scala.collection.mutable.Map
 
-sealed case class Node(val vtype: Option[VType], val mut: Boolean)
+sealed case class Node(val vtype: Option[VType], val mut: Boolean, val assigned: Boolean)
 
 class Scope {
     val nodes: Map[String, Node] = Map()
 
-    def add(name: String, vtype: Option[VType], mut: Boolean = false) {
+    def add(name: String, vtype: Option[VType], assign: Boolean = false, mut: Boolean = false) {
         nodes get name match {
-            case Some(node) if node.mut && !node.vtype.isEmpty => if (isCompatible(node.vtype, vtype)) log("ASSIGN w/ compat!", name) else log("BAD COMPAT", name)
-            case Some(node) if !node.mut && !node.vtype.isEmpty => log("CANNOT REASSIGN IMMUTABLE VARIABLE", name)
-            case Some(node) if node.vtype.isEmpty => nodes(name) = Node(vtype, node.mut)
-            case None => nodes += name -> Node(vtype, mut)
+            case Some(node) if node.mut && !node.vtype.isEmpty && !isCompatible(node.vtype, vtype) =>
+                log(s"Trying to assign $name with incompatible types", s"${node.vtype} to $vtype")
+
+            case Some(node) if !node.mut && !node.vtype.isEmpty && node.assigned =>
+                log(s"Trying to reassign immutable variable $name")
+
+            case Some(node) =>
+                if (node.vtype.isEmpty) nodes(name) = Node(vtype, node.mut, assign)
+                if (!node.assigned) nodes(name) = Node(node.vtype orElse vtype, node.mut, assign)
+
+            case None => nodes += name -> Node(vtype, mut, assign)
+            case _ => Unit
         }
     }
 
@@ -25,6 +33,15 @@ class Scope {
             case Some(nodeType) => if (nodeType == vtype) true else isCompatible(nodeType.parent, Some(vtype))
         }
     }
+
+    override def toString =
+        "Scope:\n" +
+        nodes.toSeq.map({ case (name: String, node: Node) =>
+            name + "[" +
+            node.vtype.map(_.typename).getOrElse("__None__") +
+            "]" +
+            (if (node.mut) "*" else "")
+        }).mkString("\n")
 }
 
 object Scope {
