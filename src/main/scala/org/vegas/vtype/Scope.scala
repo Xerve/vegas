@@ -1,5 +1,6 @@
 package org.vegas.vtype
 
+import org.parboiled2.Parser
 import org.vegas.log
 import scala.collection.mutable.Map
 
@@ -10,26 +11,20 @@ class Scope {
 
     def add(name: String, vtype: Option[VType], mut: Boolean = false) {
         nodes get name match {
-            case Some(node) if !node.mut && !node.vtype.isEmpty => log("Trying to reassign immutable!")
-            case Some(node) if !node.mut && node.vtype.isEmpty => nodes(name) = Node(vtype, node.mut)
-            case Some(node) if node.mut && !node.vtype.isEmpty => if (isCompatible(node, vtype)) log("Ayy its okay") else log("Not compatible types!")
+            case Some(node) if node.mut && !node.vtype.isEmpty => if (isCompatible(node.vtype, vtype)) log("ASSIGN w/ compat!", name) else log("BAD COMPAT", name)
+            case Some(node) if !node.mut && !node.vtype.isEmpty => log("CANNOT REASSIGN IMMUTABLE VARIABLE", name)
+            case Some(node) if node.vtype.isEmpty => nodes(name) = Node(vtype, node.mut)
             case None => nodes += name -> Node(vtype, mut)
         }
     }
 
-    def isCompatible(node: Node, vtype: Option[VType]): Boolean = vtype match {
+    def isCompatible(node: Option[VType], _vtype: Option[VType]): Boolean = _vtype match {
         case None => true
-        case Some(otherType) => node.vtype match {
-            case None => true
-            case Some(nodeType) if nodeType == otherType => true
-            case Some(nodeType) => nodeType.parent match {
-                case None => false
-                case Some(parent) => isCompatible(node, nodeType.parent)
-            }
+        case Some(vtype) => node match {
+            case None => false
+            case Some(nodeType) => if (nodeType == vtype) true else isCompatible(nodeType.parent, Some(vtype))
         }
     }
-
-
 }
 
 object Scope {

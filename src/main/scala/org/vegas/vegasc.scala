@@ -6,6 +6,7 @@ import org.vegas.compiler.semicolon.{SemicolonCompiler, SemicolonFileCompiler}
 import org.vegas.compiler.comment.{CommentCompiler, CommentFileCompiler}
 import org.vegas.compiler.stageN.{StageNCompiler, StageNFileCompiler}
 import org.vegas.prelude.Prelude
+import org.vegas.vtype.ast
 
 object vegasc extends App {
     val version = "0.0.0"
@@ -36,6 +37,9 @@ object vegasc extends App {
         c(SemicolonCompiler(), "--no-semicolons") >>:
         c(StageNCompiler(), "--no-parse") >>:
         FileWriter(filename)
+
+        println(ast.types.nodes)
+        println(log)
     }
 
     def compileStage(stage: String, filename: String) {

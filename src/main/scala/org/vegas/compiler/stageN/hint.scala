@@ -9,7 +9,7 @@ object hint {
         name match {
             case "scope" => scope(args)
             case "endscope" => endscope(args)
-            case _ => ast.NullExpression
+            case _ => new ast.NullExpression()
         }
 
     def scope(args: Seq[String]) = {
@@ -18,11 +18,11 @@ object hint {
             case None => None
         }
 
-        ast.NullExpression
+        new ast.NullExpression()
     }
 
     def endscope(args: Seq[String]) = {
         ast.scope.pop
-        ast.NullExpression
+        new ast.NullExpression()
     }
 }

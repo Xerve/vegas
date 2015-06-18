@@ -8,7 +8,7 @@ import scala.util.{Success, Failure}
 class StageNCompiler extends Compiler {
     def compile(source: String) =
         new StageNParser(source).Program.run() match {
-            case Success(result) => { println(ast.types.nodes); Some(result.foldLeft("") { (body, expression) => body + expression.eval + ";" }) }
+            case Success(result) => { Some(result.foldLeft("") { (body, expression) => body + expression.eval + ";" }) }
             case Failure(error: ParseError) =>
                 println("Compilation failed with error:\n" + error.format(source))
                 None

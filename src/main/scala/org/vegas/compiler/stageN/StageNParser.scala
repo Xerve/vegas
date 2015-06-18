@@ -6,6 +6,8 @@ import scala.collection.immutable.Seq
 import scala.collection.mutable.Stack
 
 class StageNParser(val input: ParserInput) extends Parser {
+    implicit val parser = this
+    
     def Program = rule { Whitespace ~ zeroOrMore(Expression ~ ";" ~ Whitespace) ~ EOI }
 
     def Expression: Rule1[ast.Expression] = rule {
