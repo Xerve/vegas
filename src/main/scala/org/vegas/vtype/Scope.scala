@@ -34,6 +34,8 @@ class Scope {
         }
     }
 
+    def apply(node: String) = nodes.get(node).map(_.vtype).getOrElse(None)
+
     override def toString =
         "Scope:\n" +
         nodes.toSeq.map({ case (name: String, node: Node) =>

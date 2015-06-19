@@ -36,7 +36,7 @@ class StageNParser(val input: ParserInput) extends Parser {
         !(ch('"') ~ ANY) ~
         !Keyword ~
         CharPredicate("\\ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz") ~
-        zeroOrMore(CharPredicate("\\.ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"))
+        zeroOrMore(CharPredicate("\\ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"))
     }
 
     def Whitespace = rule { quiet(zeroOrMore(CharPredicate(" \n\r\t\f"))) }
@@ -63,7 +63,7 @@ class StageNParser(val input: ParserInput) extends Parser {
 
     def ObjectAttribute = rule { (capture(Identifier) | StringLiteral) ~ Whitespace ~ atomic("=>") ~ Whitespace ~ Expression ~> (Tuple2(_, _)) }
 
-    def IdentifierLiteral = rule { capture(Identifier) ~> (ast.IdentifierLiteral(_)) }
+    def IdentifierLiteral = rule { (capture(Identifier) + '.') ~> (ast.IdentifierLiteral(_)) }
 
     def Binding = rule { atomic("let") ~ Whitespace ~ Pattern ~ Whitespace ~ "=" ~ Whitespace ~ Expression ~> (ast.Binding(_, _)) }
 
@@ -79,19 +79,17 @@ class StageNParser(val input: ParserInput) extends Parser {
 
     def ArrayPattern = rule { "[" ~ (IdentifierPattern + ("," ~ Whitespace)) ~ "]" ~> (ast.ArrayPattern(_)) }
 
-    def FunctionCall: Rule1[ast.Expression] = rule {
-        ImplicitFunctionCall |
-        FunctionChain |
-        ExplicitFunctionCall
+    def FunctionCall = rule {
+        FunctionChain
     }
 
     def ExplicitFunctionCall = rule { IdentifierLiteral ~ '(' ~ (Expression * (',' ~ Whitespace)) ~ Whitespace ~ ')' ~> (ast.FunctionCall(_, _)) }
 
-    def ImplicitFunctionCall = rule {
-        oneOrMore(IdentifierLiteral ~ ' ') ~ (Expression + (',' ~ Whitespace)) ~> (ast.implicitCallToFunction(_, _))
-    }
+    // def ImplicitFunctionCall = rule {
+    //     oneOrMore(IdentifierLiteral ~ ' ') ~ (Expression + (',' ~ Whitespace)) ~> (ast.implicitCallToFunction(_, _))
+    // }
 
-    def FunctionChain = rule { ((ExplicitFunctionCall | IdentifierLiteral) + (Whitespace ~ '.' ~ Whitespace)) ~> (ast.FunctionChain(_)) }
+    def FunctionChain = rule { (ExplicitFunctionCall + '.') ~ optional('.' ~ IdentifierLiteral) ~> (ast.FunctionChain(_, _)) }
 
     def CompilerHint = rule { "#[" ~ capture(oneOrMore(CharPredicate.AlphaNum)) ~ ']' ~ Whitespace ~ (('<' ~ capture(oneOrMore(CharPredicate.AlphaNum)) ~ '>') * Whitespace) ~> (hint(_, _)) }
 }

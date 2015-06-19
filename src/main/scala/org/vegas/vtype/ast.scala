@@ -24,13 +24,15 @@ package object ast {
         val vtype = VNull
     }
 
-    case class FunctionChain(val functions: Seq[Expression]) extends Expression {
-        def eval = "$" + functions.map(_.eval.tail).mkString("->")
+    case class FunctionChain(val functions: Seq[FunctionCall], ending: Option[IdentifierLiteral]) extends Expression {
+        def eval = functions.map(_.eval).mkString("->") + ending.map("->" + _.identifier).getOrElse("")
         val vtype = VAny
     }
 
     case class FunctionCall(val function: IdentifierLiteral, val args: Seq[Expression]) extends Expression {
-        def eval = function.eval + "(" + args.map(_.eval).mkString(",") + ")"
+        def eval = {
+            function.identifier + "(" + args.map(_.eval).mkString(",") + ")"
+        }
         val vtype = VAny
     }
 
@@ -46,7 +48,7 @@ package object ast {
 
     case class IdentifierPattern(val identifier: IdentifierLiteral, val t: Option[String], val mut: Boolean) extends Pattern {
         types.add((scope :+ eval).mkString("\\"), t.map(VType getType _), false, mut)
-        def eval = identifier.identifier
+        def eval = identifier.eval
         def decompose(that: Expression) = {
             types.add((scope :+ eval).mkString("\\"), Some(that.vtype), true)
             identifier.eval + " = " + that.eval
@@ -102,14 +104,15 @@ package object ast {
         val vtype = VAny
     }
 
-    case class IdentifierLiteral(val identifier: String) extends Literal {
-        def eval = "$" + identifier.replaceAllLiterally(".", "->")
+    case class IdentifierLiteral(val identifiers: Seq[String]) extends Literal {
+        def eval = "$" + identifier
+        val identifier = identifiers.mkString("->")
         val vtype = VAny
     }
 
-    def implicitCallToFunction(identifiers: Seq[IdentifierLiteral], args: Seq[Expression]) =
-        FunctionCall(IdentifierLiteral(identifiers.map(_.eval.tail).mkString(".")), args)
-
-    def implicitCallToFunction(identifiers: Seq[IdentifierLiteral], arg: IdentifierLiteral) =
-        FunctionCall(IdentifierLiteral(identifiers.map(_.eval.tail).mkString(".")), Seq(arg))
+    // def implicitCallToFunction(identifiers: Seq[IdentifierLiteral], args: Seq[Expression]) =
+    //     FunctionCall(IdentifierLiteral(identifiers.map(_.eval), args))
+    //
+    // def implicitCallToFunction(identifiers: Seq[IdentifierLiteral], arg: IdentifierLiteral) =
+    //     FunctionCall(IdentifierLiteral(identifiers.map(_.eval), Seq(arg)))
 }
