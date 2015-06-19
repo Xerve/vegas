@@ -6,24 +6,22 @@ import scala.collection.immutable.Seq
 import scala.collection.mutable.Stack
 
 class StageNParser(val input: ParserInput) extends Parser {
-    implicit val parser = this
-    
-    def Program = rule { Whitespace ~ zeroOrMore(Expression ~ ";" ~ Whitespace) ~ EOI }
+    def Program = rule { Whitespace ~ oneOrMore(Expression ~ ";" ~ Whitespace) ~ EOI }
 
     def Expression: Rule1[ast.Expression] = rule {
         CompilerHint |
         FunctionCall |
         Binding |
         Literal |
-        '(' ~ Whitespace ~ Expression ~ Whitespace ~ ')'
+        quiet('(' ~ Whitespace ~ Expression ~ Whitespace ~ ')')
     }
 
     def Literal = rule {
         IdentifierLiteral |
         NumberLiteral ~> (ast.NumberLiteral(_)) |
         StringLiteral ~> (ast.StringLiteral(_)) |
-        BooleanLiteral ~> (ast.BooleanLiteral(_)) |
         NullLiteral ~> (ast.NullLiteral(_)) |
+        BooleanLiteral ~> (ast.BooleanLiteral(_)) |
         ArrayLiteral ~> (ast.ArrayLiteral(_)) |
         ObjectLiteral ~> (ast.ObjectLiteral(_))
     }
@@ -31,14 +29,14 @@ class StageNParser(val input: ParserInput) extends Parser {
     def Keyword = rule {
         NullKeyword |
         BooleanKeyword |
-        "let"
+        atomic("let")
     }
 
     def Identifier = rule {
         !(ch('"') ~ ANY) ~
         !Keyword ~
-        CharPredicate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz") ~
-        zeroOrMore(CharPredicate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"))
+        CharPredicate("\\ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz") ~
+        zeroOrMore(CharPredicate("\\.ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"))
     }
 
     def Whitespace = rule { quiet(zeroOrMore(CharPredicate(" \n\r\t\f"))) }
@@ -53,11 +51,11 @@ class StageNParser(val input: ParserInput) extends Parser {
 
     def NullLiteral = rule { capture(NullKeyword) ~> (_.toString) }
 
-    def NullKeyword = rule { "null" }
+    def NullKeyword = rule { atomic("null") }
 
     def BooleanLiteral = rule { capture(BooleanKeyword) ~> (_.toString) }
 
-    def BooleanKeyword = rule { "true" | "yes" | "on" | "false" | "no" | "off" }
+    def BooleanKeyword = rule { atomic("true") | atomic("yes") | atomic("on") | atomic("false") | atomic("no") | atomic("off") }
 
     def ArrayLiteral = rule { '[' ~ Whitespace ~ (Expression + (',' ~ Whitespace)) ~ Whitespace ~ ']' }
 
@@ -67,7 +65,7 @@ class StageNParser(val input: ParserInput) extends Parser {
 
     def IdentifierLiteral = rule { capture(Identifier) ~> (ast.IdentifierLiteral(_)) }
 
-    def Binding = rule { "let" ~ Whitespace ~ Pattern ~ Whitespace ~ "=" ~ Whitespace ~ Expression ~> (ast.Binding(_, _)) }
+    def Binding = rule { atomic("let") ~ Whitespace ~ Pattern ~ Whitespace ~ "=" ~ Whitespace ~ Expression ~> (ast.Binding(_, _)) }
 
     def Pattern = rule {
         IdentifierPattern |
@@ -75,14 +73,15 @@ class StageNParser(val input: ParserInput) extends Parser {
     }
 
     def IdentifierPattern = rule {
-        "mut" ~ Whitespace ~ IdentifierLiteral ~ optional(":" ~ Whitespace ~ capture(Identifier)) ~> (ast.IdentifierPattern(_, _, true)) |
+        atomic("mut") ~ Whitespace ~ IdentifierLiteral ~ optional(":" ~ Whitespace ~ capture(Identifier)) ~> (ast.IdentifierPattern(_, _, true)) |
         IdentifierLiteral ~ optional(":" ~ Whitespace ~ capture(Identifier)) ~> (ast.IdentifierPattern(_, _, false))
     }
 
     def ArrayPattern = rule { "[" ~ (IdentifierPattern + ("," ~ Whitespace)) ~ "]" ~> (ast.ArrayPattern(_)) }
 
-    def FunctionCall = rule {
+    def FunctionCall: Rule1[ast.Expression] = rule {
         ImplicitFunctionCall |
+        FunctionChain |
         ExplicitFunctionCall
     }
 
@@ -91,6 +90,8 @@ class StageNParser(val input: ParserInput) extends Parser {
     def ImplicitFunctionCall = rule {
         oneOrMore(IdentifierLiteral ~ ' ') ~ (Expression + (',' ~ Whitespace)) ~> (ast.implicitCallToFunction(_, _))
     }
+
+    def FunctionChain = rule { ((ExplicitFunctionCall | IdentifierLiteral) + (Whitespace ~ '.' ~ Whitespace)) ~> (ast.FunctionChain(_)) }
 
     def CompilerHint = rule { "#[" ~ capture(oneOrMore(CharPredicate.AlphaNum)) ~ ']' ~ Whitespace ~ (('<' ~ capture(oneOrMore(CharPredicate.AlphaNum)) ~ '>') * Whitespace) ~> (hint(_, _)) }
 }

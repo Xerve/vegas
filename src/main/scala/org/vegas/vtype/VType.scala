@@ -7,17 +7,17 @@ import scala.collection.mutable.MutableList
 abstract class VType {
     val parent: Option[VType]
     val typename: String
-    val macros: Map[String, Seq[ast.Expression] => String] = Map()
+    val macros: Map[String, (ast.Expression, Seq[ast.Expression]) => String] = Map()
 
-    def define(_macro: Tuple2[String, Seq[ast.Expression] => String]) {
+    def define(_macro: Tuple2[String, (ast.Expression, Seq[ast.Expression]) => String]) {
         macros += _macro
     }
 
-    def apply(_macro: String, args: Seq[ast.Expression]): Option[String] =
+    def apply(_macro: String, callee: ast.Expression, args: Seq[ast.Expression]): Option[String] =
         macros get _macro match {
-            case Some(vmacro) => Some(vmacro(args))
+            case Some(vmacro) => Some(vmacro(callee, args))
             case None => parent match {
-                case Some(parent) => parent(_macro, args)
+                case Some(parent) => parent(_macro, callee, args)
                 case None => None
             }
         }

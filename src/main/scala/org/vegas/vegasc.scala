@@ -17,6 +17,8 @@ object vegasc extends App {
                   .alias("h", "help")
                   .description("help", "Prints help")
 
+    Prelude.init
+
     args.length match {
         case 0 => options.printHelp
         case 1 if args(0).startsWith("-") => parseFlag(args(0))
@@ -24,8 +26,6 @@ object vegasc extends App {
         case 2 if args(0).startsWith("--stage-") => compileStage(args(0), args(1))
         case _ => compileFile(args(0))
     }
-
-    Prelude.init
 
     def compileFile(filename: String) {
         def c(compiler: Compiler, switch: String) =
@@ -41,6 +41,7 @@ object vegasc extends App {
         println(ast.types)
         println("")
         println(log)
+        println(vtype.VAny.macros)
     }
 
     def compileStage(stage: String, filename: String) {

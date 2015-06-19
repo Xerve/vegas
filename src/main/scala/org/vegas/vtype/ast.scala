@@ -24,6 +24,11 @@ package object ast {
         val vtype = VNull
     }
 
+    case class FunctionChain(val functions: Seq[Expression]) extends Expression {
+        def eval = "$" + functions.map(_.eval.tail).mkString("->")
+        val vtype = VAny
+    }
+
     case class FunctionCall(val function: IdentifierLiteral, val args: Seq[Expression]) extends Expression {
         def eval = function.eval + "(" + args.map(_.eval).mkString(",") + ")"
         val vtype = VAny
