@@ -25,15 +25,30 @@ package object ast {
     }
 
     case class FunctionChain(val functions: Seq[FunctionCall], ending: Option[IdentifierLiteral]) extends Expression {
-        def eval = functions.map(_.eval).mkString("->") + ending.map("->" + _.identifier).getOrElse("")
+        //def eval = functions.map(_.eval).mkString("->") + ending.map("->" + _.identifier).getOrElse("")
+        def eval = (functions.tail.foldLeft[Function](functions.head) { (fn, next) =>
+            println(fn)
+            fn eval next
+        }).eval
+
         val vtype = VAny
     }
 
-    case class FunctionCall(val function: IdentifierLiteral, val args: Seq[Expression]) extends Expression {
-        def eval = {
-            function.identifier + "(" + args.map(_.eval).mkString(",") + ")"
-        }
+    abstract class Function extends Expression {
+        def eval(callee: Expression): Function
+    }
+
+    case class FunctionCall(val function: IdentifierLiteral, val args: Seq[Expression]) extends Function {
+        def eval = function.identifier + "(" + args.map(_.eval).mkString(",") + ")"
+
+        def eval(callee: Expression) = callee.vtype(function.identifier, callee, args).getOrElse(MacroExpression(eval, VAny))
+
         val vtype = VAny
+    }
+
+    case class MacroExpression(val result: String, val vtype: VType) extends Function {
+        def eval = result
+        def eval(callee: Expression) = MacroExpression(result + callee.eval, callee.vtype)
     }
 
     case class Binding(val pattern: Pattern, val expression: Expression) extends Expression {
