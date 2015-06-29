@@ -24,15 +24,12 @@ package object ast {
         val vtype = VNull
     }
 
-    case class FunctionChain(val functions: Seq[FunctionCall], ending: Option[IdentifierLiteral]) extends Expression {
-        def eval = functions.map(_.eval).mkString("->") + ending.map("->" + _.identifier).getOrElse("")
-        val vtype = VAny
-    }
+    case class FunctionCall(val callee: Expression, val functions: Seq[Tuple2[String, Seq[Expression]]]) extends Expression {// val functionName: String, val args: Seq[Expression]) extends Expression {
+        //def eval = function.identifier + "(" + args.map(_.eval).mkString(",") + ")"
 
-    case class FunctionCall(val function: IdentifierLiteral, val args: Seq[Expression]) extends Expression {
-        def eval = function.identifier + "(" + args.map(_.eval).mkString(",") + ")"
+        // def eval(callee: Expression): String = callee.vtype(function.identifier, callee, args).getOrElse(eval)
 
-        def eval(callee: Expression): String = callee.vtype(function.identifier, callee, args).getOrElse(eval)
+        def eval = "[" + callee.eval + "]" + functions.toString
 
         val vtype = VAny
     }
@@ -105,9 +102,8 @@ package object ast {
         val vtype = VAny
     }
 
-    case class IdentifierLiteral(val identifiers: Seq[String]) extends Literal {
+    case class IdentifierLiteral(val identifier: String) extends Literal {
         def eval = "$" + identifier
-        val identifier = identifiers.mkString("->")
         val vtype = VAny
     }
 

@@ -13,16 +13,16 @@ abstract class VType {
         macros += _macro
     }
 
-    def apply(_macro: String, callee: ast.Expression, args: Seq[ast.Expression]): Option[String] =
-        macros get _macro match {
-            case Some(vmacro) => Some(vmacro(callee, args))
-            case None => parent match {
-                case Some(parent) => parent(_macro, callee, args)
-                case None => None
-            }
-        }
-
-    override def toString = typename
+    // def call(_macro: String, callee: ast.Expression, args: Seq[ast.Expression]): Option[String] =
+    //     macros get _macro match {
+    //         case Some(vmacro) => Some(vmacro(callee, args))
+    //         case None => parent match {
+    //             case Some(parent) => parent(_macro, callee, args)
+    //             case None => None
+    //         }
+    //     }
+    //
+    // override def toString = typename
 }
 
 object VType {
