@@ -14,7 +14,7 @@ package object VAnyPrelude extends Prelude {
         object VAnyAccessor extends VMacro {
             val name = "."
             def eval(callee: ast.Expression, args: Seq[ast.Expression]) = {
-                args headOption match {
+                args.headOption match {
                     case Some(head: ast.IdentifierLiteral) => ast.GenericExpression(callee.eval + "->" + head.identifier)(VAny)
                     case _ => new ast.NullExpression()
                 }
