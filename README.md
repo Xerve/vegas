@@ -3,6 +3,7 @@
 [![Codacy Badge](https://www.codacy.com/project/badge/3292bdb90f5d46ad9929ccd71ec8425f)](https://www.codacy.com/app/rrdelaney/vegas)
 
 A language that compiles to PHP lol
+Now with compile-time macros!
 
 ## Examples
 
