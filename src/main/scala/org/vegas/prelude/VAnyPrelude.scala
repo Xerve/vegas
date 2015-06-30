@@ -21,7 +21,21 @@ package object VAnyPrelude extends Prelude {
             }
         }
 
-        VAny define "print" -> VAnyPrint
-        VAny define "." -> VAnyAccessor
+        object VAnyPlus extends VMacro {
+            val name = "+"
+            def eval(callee: ast.Expression, args: Seq[ast.Expression]) =
+                ast.GenericExpression("(" + callee.eval + " + " + args.map(_.eval).mkString(" + ") + ")")(VAny)
+        }
+
+        object VAnyMinus extends VMacro {
+            val name = "-"
+            def eval(callee: ast.Expression, args: Seq[ast.Expression]) =
+                ast.GenericExpression("(" + callee.eval + " - " + args.map(_.eval).mkString(" + ") + ")")(VAny)
+        }
+
+        VAny define VAnyPrint
+        VAny define VAnyAccessor
+        VAny define VAnyPlus
+        VAny define VAnyMinus
     }
 }

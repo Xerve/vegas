@@ -6,6 +6,11 @@ import scala.collection.mutable.MutableList
 abstract class VMacro {
     val name: String
     def eval(callee: ast.Expression, args: Seq[ast.Expression]): ast.Expression
+    override def toString = s"Macro<$name>"
+}
+
+case class GenericVMacro(val name: String, val function: (ast.Expression, Seq[ast.Expression]) => ast.Expression) extends VMacro {
+    def eval(callee: ast.Expression, args: Seq[ast.Expression]) = function(callee, args)
 }
 
 abstract class VType {
@@ -13,8 +18,12 @@ abstract class VType {
     val typename: String
     val macros: Map[String, VMacro] = Map()
 
-    def define(_macro: Tuple2[String, VMacro]) {
-        macros += _macro
+    def define(_macro: VMacro) {
+        macros += _macro.name -> _macro
+    }
+
+    def define(macroName: String, function: (ast.Expression, Seq[ast.Expression]) => ast.Expression) {
+        macros += macroName -> GenericVMacro(macroName, function)
     }
 
     def call(macroName: String, callee: ast.Expression, args: Seq[ast.Expression]): Option[ast.Expression] =
