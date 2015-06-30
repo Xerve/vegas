@@ -1,28 +1,32 @@
 package org.vegas.vtype
 
-import scala.collection.immutable.Seq
 import scala.collection.mutable.Map
 import scala.collection.mutable.MutableList
+
+abstract class VMacro {
+    val name: String
+    def eval(callee: ast.Expression, args: Seq[ast.Expression]): ast.Expression
+}
 
 abstract class VType {
     val parent: Option[VType]
     val typename: String
-    val macros: Map[String, (ast.Expression, Seq[ast.Expression]) => String] = Map()
+    val macros: Map[String, VMacro] = Map()
 
-    def define(_macro: Tuple2[String, (ast.Expression, Seq[ast.Expression]) => String]) {
+    def define(_macro: Tuple2[String, VMacro]) {
         macros += _macro
     }
 
-    // def call(_macro: String, callee: ast.Expression, args: Seq[ast.Expression]): Option[String] =
-    //     macros get _macro match {
-    //         case Some(vmacro) => Some(vmacro(callee, args))
-    //         case None => parent match {
-    //             case Some(parent) => parent(_macro, callee, args)
-    //             case None => None
-    //         }
-    //     }
-    //
-    // override def toString = typename
+    def call(macroName: String, callee: ast.Expression, args: Seq[ast.Expression]): Option[ast.Expression] =
+        macros get macroName match {
+            case Some(vmacro) => Some(vmacro.eval(callee, args))
+            case None => parent match {
+                case Some(parent) => parent.call(macroName, callee, args)
+                case None => None
+            }
+        }
+
+    override def toString = typename
 }
 
 object VType {

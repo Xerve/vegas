@@ -9,10 +9,11 @@ class StageNParser(val input: ParserInput) extends Parser {
     def Program = rule { Whitespace ~ oneOrMore(Expression ~ ";" ~ Whitespace) ~ EOI }
 
     def Expression: Rule1[ast.Expression] = rule {
+        (quiet('(') ~ Whitespace ~ Expression ~ Whitespace ~ quiet(')')) |
         CompilerHint |
         FunctionCall |
-        Binding |
-        Literal
+        Literal |
+        Binding
     }
 
     def Literal = rule {
@@ -39,8 +40,11 @@ class StageNParser(val input: ParserInput) extends Parser {
     }
 
     def FunctionName = rule {
-        capture(oneOrMore(CharPredicate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"))) |
-        capture(oneOrMore(CharPredicate(".<>*&%+-|")))
+        oneOrMore(CharPredicate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"))
+    }
+
+    def OperatorName = rule {
+        oneOrMore(CharPredicate(".<>*&%+-|"))
     }
 
     def Whitespace = rule { quiet(zeroOrMore(CharPredicate(" \n\r\t\f"))) }
@@ -84,10 +88,14 @@ class StageNParser(val input: ParserInput) extends Parser {
     def ArrayPattern = rule { "[" ~ (IdentifierPattern + ("," ~ Whitespace)) ~ "]" ~> (ast.ArrayPattern(_)) }
 
     def FunctionCall = rule {
-        ExplicitFunctionCall
+        Literal ~ Whitespace ~ (FunctionCaller + Whitespace) ~> (ast.FunctionCall(_, _))
     }
 
-    def ExplicitFunctionCall = rule { Literal ~ Whitespace ~ oneOrMore(FunctionName ~ Whitespace ~ (Expression * (',' ~ Whitespace))) ~> (ast.FunctionCall(_, _)) }
+    def FunctionCaller: Rule1[ast.FunctionCaller] = rule {
+        (capture(OperatorName) ~ Whitespace ~ Literal ~> (ast.FunctionCaller(_, _))) |
+        (capture(OperatorName) ~ Whitespace ~ Expression ~> (ast.FunctionCaller(_, _))) |
+        (capture(FunctionName) ~ Whitespace ~ (Expression * (',' ~ Whitespace)) ~> (ast.FunctionCaller(_: String, _: Seq[ast.Expression])))
+    }
 
     def CompilerHint = rule { "#[" ~ capture(oneOrMore(CharPredicate.AlphaNum)) ~ ']' ~ Whitespace ~ (('<' ~ capture(oneOrMore(CharPredicate.AlphaNum)) ~ '>') * Whitespace) ~> (hint(_, _)) }
 }

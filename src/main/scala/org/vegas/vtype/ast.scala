@@ -17,21 +17,34 @@ package object ast {
     abstract class Expression {
         def eval: String
         val vtype: VType
+
+        def callMacro(macroName: String, args: Seq[Expression]) =  vtype.call(macroName, this, args)
+    }
+
+    case class GenericExpression(val result: String)(implicit val vtype: VType) extends Expression {
+        def eval = result
     }
 
     class NullExpression extends Expression {
-        def eval = ""
+        def eval = "NULL_EXPRESSION"
         val vtype = VNull
     }
 
-    case class FunctionCall(val callee: Expression, val functions: Seq[Tuple2[String, Seq[Expression]]]) extends Expression {// val functionName: String, val args: Seq[Expression]) extends Expression {
-        //def eval = function.identifier + "(" + args.map(_.eval).mkString(",") + ")"
+    class FunctionCaller(val functionName: String, val args: Seq[Expression])
 
-        // def eval(callee: Expression): String = callee.vtype(function.identifier, callee, args).getOrElse(eval)
+    object FunctionCaller {
+        def apply(functionName: String, args: Seq[Expression]) = new FunctionCaller(functionName, args)
+        def apply(functionName: String, arg: Expression) = new FunctionCaller(functionName, Seq(arg))
+    }
 
-        def eval = "[" + callee.eval + "]" + functions.toString
-
+    case class FunctionCall(val callee: Expression, val functions: Seq[FunctionCaller]) extends Expression {
         val vtype = VAny
+        def eval = (functions.foldLeft(callee) { (expression, caller) =>
+            expression.callMacro(caller.functionName, caller.args) match {
+                case Some(result) => result
+                case None => ast.GenericExpression(expression.eval + "->" + caller.functionName + "(" + caller.args.map(_.eval).mkString(", ") + ")")(VAny)
+            }
+        }).eval
     }
 
     case class Binding(val pattern: Pattern, val expression: Expression) extends Expression {
@@ -106,10 +119,4 @@ package object ast {
         def eval = "$" + identifier
         val vtype = VAny
     }
-
-    // def implicitCallToFunction(identifiers: Seq[IdentifierLiteral], args: Seq[Expression]) =
-    //     FunctionCall(IdentifierLiteral(identifiers.map(_.eval), args))
-    //
-    // def implicitCallToFunction(identifiers: Seq[IdentifierLiteral], arg: IdentifierLiteral) =
-    //     FunctionCall(IdentifierLiteral(identifiers.map(_.eval), Seq(arg)))
 }
