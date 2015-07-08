@@ -21,7 +21,7 @@ package object ast {
         def callMacro(macroName: String, args: Seq[Expression]) =  vtype.call(macroName, this, args)
     }
 
-    case class GenericExpression(val result: String)(implicit val vtype: VType) extends Expression {
+    case class GenericExpression(val vtype: VType, val result: String) extends Expression {
         def eval = result
     }
 
@@ -42,7 +42,7 @@ package object ast {
         def eval = (functions.foldLeft(callee) { (expression, caller) =>
             expression.callMacro(caller.functionName, caller.args) match {
                 case Some(result) => result
-                case None => ast.GenericExpression(expression.eval + "->" + caller.functionName + "(" + caller.args.map(_.eval).mkString(", ") + ")")(VAny)
+                case None => ast.GenericExpression(VAny, expression.eval + "->" + caller.functionName + "(" + caller.args.map(_.eval).mkString(", ") + ")")
             }
         }).eval
     }
