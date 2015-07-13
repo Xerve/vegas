@@ -19,6 +19,12 @@ package object VAnyPrelude extends Prelude {
                 }
             }
         }
+        
+        object VAnyApply extends VMacro {
+            val name = "$apply"
+            def eval(callee: ast.Expression, args: Seq[ast.Expression]) =
+                ast.GenericExpression(VAny, callee.eval + "(" + args.mkString(",") + ")")
+        }
 
         object VAnyPlus extends VMacro {
             val name = "+"
@@ -31,10 +37,25 @@ package object VAnyPrelude extends Prelude {
             def eval(callee: ast.Expression, args: Seq[ast.Expression]) =
                 ast.GenericExpression(VAny, "(" + callee.eval + " - " + args.map(_.eval).mkString(" + ") + ")")
         }
+        
+        object VAnyMultiply extends VMacro {
+            val name = "*"
+            def eval(callee: ast.Expression, args: Seq[ast.Expression]) =
+                ast.GenericExpression(VAny, "(" + callee.eval + " * " + args.map(_.eval).mkString(" + ") + ")")
+        }
+        
+        object VAnyDivide extends VMacro {
+            val name = "/"
+            def eval(callee: ast.Expression, args: Seq[ast.Expression]) =
+                ast.GenericExpression(VAny, "(" + callee.eval + " / " + args.map(_.eval).mkString(" + ") + ")")
+        }
 
         VAny define VAnyPrint
         VAny define VAnyAccessor
+        VAny define VAnyApply
         VAny define VAnyPlus
         VAny define VAnyMinus
+        VAny define VAnyMultiply
+        VAny define VAnyDivide
     }
 }
