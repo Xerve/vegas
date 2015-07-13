@@ -40,7 +40,7 @@ class StageNParser(val input: ParserInput) extends Parser {
     }
 
     def FunctionName = rule {
-        oneOrMore(CharPredicate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"))
+        oneOrMore(CharPredicate("$ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"))
     }
 
     def OperatorName = rule {
