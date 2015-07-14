@@ -115,8 +115,8 @@ package object ast {
         val vtype = VAny
     }
 
-    case class IdentifierLiteral(val identifier: String) extends Literal {
-        def eval = "$" + identifier
+    case class IdentifierLiteral(val identifier: String, val nonVariable: Boolean = false) extends Literal {
+        def eval = (if (nonVariable) "" else "$") + identifier
         val vtype = VAny
     }
 }

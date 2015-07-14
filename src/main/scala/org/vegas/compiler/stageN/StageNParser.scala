@@ -35,12 +35,12 @@ class StageNParser(val input: ParserInput) extends Parser {
     def Identifier = rule {
         !(ch('"') ~ ANY) ~
         !Keyword ~
-        CharPredicate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz") ~
-        zeroOrMore(CharPredicate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"))
+        CharPredicate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_") ~
+        zeroOrMore(CharPredicate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_"))
     }
 
     def FunctionName = rule {
-        oneOrMore(CharPredicate("$ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"))
+        oneOrMore(CharPredicate("$ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_"))
     }
 
     def OperatorName = rule {
@@ -71,7 +71,8 @@ class StageNParser(val input: ParserInput) extends Parser {
 
     def ObjectAttribute = rule { (capture(Identifier) | StringLiteral) ~ Whitespace ~ atomic("=>") ~ Whitespace ~ Expression ~> (Tuple2(_, _)) }
 
-    def IdentifierLiteral = rule { capture(Identifier) ~> (ast.IdentifierLiteral(_)) }
+    def IdentifierLiteral = rule { capture(Identifier) ~ '!' ~> (ast.IdentifierLiteral(_, nonVariable = true)) |
+                                   capture(Identifier) ~> (ast.IdentifierLiteral(_, nonVariable = false))}
 
     def Binding = rule { atomic("let") ~ Whitespace ~ Pattern ~ Whitespace ~ "=" ~ Whitespace ~ Expression ~> (ast.Binding(_, _)) }
 
@@ -94,7 +95,7 @@ class StageNParser(val input: ParserInput) extends Parser {
     def FunctionCaller: Rule1[ast.FunctionCaller] = rule {
         (capture(OperatorName) ~ Whitespace ~ Literal ~> (ast.FunctionCaller(_, _))) |
         (capture(OperatorName) ~ Whitespace ~ Expression ~> (ast.FunctionCaller(_, _))) |
-        (capture(FunctionName) ~ Whitespace ~ (Expression * (',' ~ Whitespace)) ~> (ast.FunctionCaller(_: String, _: Seq[ast.Expression])))
+        (capture(FunctionName) ~ Whitespace ~ ("(" | "") ~ (Expression * (',' ~ Whitespace)) ~ (")" | "") ~> (ast.FunctionCaller(_: String, _: Seq[ast.Expression])))
     }
 
     def CompilerHint = rule { "#[" ~ capture(oneOrMore(CharPredicate.AlphaNum)) ~ ']' ~ Whitespace ~ (('<' ~ capture(oneOrMore(CharPredicate.AlphaNum)) ~ '>') * Whitespace) ~> (hint(_, _)) }
