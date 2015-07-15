@@ -13,7 +13,7 @@ abstract class Compiler {
 }
 
 sealed class CompilerPipeline(stage1: Compiler, stage2: Compiler) extends Compiler {
-    def compile(source: String) = stage1.compile(source).map(stage2.compile(_.get))
+    def compile(source: String) = stage1.compile(source).fold[Option[String]](None)(stage2.compile(_))
 }
 
 case class FileReader(val filename: String) extends Compiler
