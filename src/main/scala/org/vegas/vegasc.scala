@@ -37,7 +37,7 @@ object vegasc extends App {
         c(CommentCompiler(), "--no-comment") >>:
         c(BracesCompiler(), "--no-braces") >>:
         c(SemicolonCompiler(), "--no-semicolons") >>:
-        c(StageNCompiler(), "--no-parse") >>:
+        c(StageNCompiler(), "--no-stageN") >>:
         FileWriter(filename)
 
         println(ast.types)
