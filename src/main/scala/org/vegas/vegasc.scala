@@ -1,6 +1,7 @@
 package org.vegas
 
 import org.vegas.compiler.{Compiler, CompilerOptions, FileReader, FileWriter, PassThru}
+import org.vegas.compiler.stringReplace.{StringLoader, StringUnloader}
 import org.vegas.compiler.apply.{ApplyCompiler, ApplyFileCompiler}
 import org.vegas.compiler.braces.{BracesCompiler, BracesFileCompiler}
 import org.vegas.compiler.semicolon.{SemicolonCompiler, SemicolonFileCompiler}
@@ -33,10 +34,12 @@ object vegasc extends App {
             if (options hasFlag switch) PassThru() else compiler
 
         FileReader(filename) >>:
+        StringLoader() >>:
         c(ApplyCompiler(), "--no-apply") >>:
         c(CommentCompiler(), "--no-comment") >>:
         c(BracesCompiler(), "--no-braces") >>:
         c(SemicolonCompiler(), "--no-semicolons") >>:
+        StringUnloader() >>:
         c(StageNCompiler(), "--no-stageN") >>:
         FileWriter(filename)
 

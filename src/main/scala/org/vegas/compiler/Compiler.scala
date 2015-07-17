@@ -18,6 +18,7 @@ object Compiler {
     var refCount = 0;
     val scope = Stack[String]()
     val types = Scope()
+    val stringStorage = Stack[String]()
 
     def usesRef(f: String => String) = {
         refCount += 1
