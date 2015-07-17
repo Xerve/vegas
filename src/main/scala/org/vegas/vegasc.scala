@@ -40,7 +40,7 @@ object vegasc extends App {
         c(StageNCompiler(), "--no-stageN") >>:
         FileWriter(filename)
 
-        println(ast.types)
+        println(Compiler.types)
         println("")
         println(log)
         println(vtype.VAny.macros)

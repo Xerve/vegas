@@ -1,6 +1,7 @@
 package org.vegas.compiler.stageN
 
-import org.vegas.vtype.ast
+import org.vegas.vtype.ast.NullExpression
+import org.vegas.compiler.Compiler
 import scala.collection.immutable.Seq
 import scala.collection.mutable.Stack
 
@@ -9,20 +10,20 @@ object hint {
         name match {
             case "scope" => scope(args)
             case "endscope" => endscope(args)
-            case _ => new ast.NullExpression()
+            case _ => new NullExpression()
         }
 
     def scope(args: Seq[String]) = {
         args.headOption match {
-            case Some(arg) => ast.scope push arg
+            case Some(arg) => Compiler.scope push arg
             case None => None
         }
 
-        new ast.NullExpression()
+        new NullExpression()
     }
 
     def endscope(args: Seq[String]) = {
-        ast.scope.pop
-        new ast.NullExpression()
+        Compiler.scope.pop
+        new NullExpression()
     }
 }

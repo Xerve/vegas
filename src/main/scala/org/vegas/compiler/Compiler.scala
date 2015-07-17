@@ -1,7 +1,9 @@
 package org.vegas.compiler
 
 import java.io.{PrintWriter, File}
+import scala.collection.mutable.Stack
 import org.vegas.vegasc
+import org.vegas.vtype.Scope
 
 abstract class Compiler {
     val options = vegasc.options
@@ -10,6 +12,17 @@ abstract class Compiler {
     def >>:(that: String) = compile(that)
     def >>:(that: FileReader) = compile(that.source)
     def >>:(that: Compiler) = new CompilerPipeline(that, this)
+}
+
+object Compiler {
+    var refCount = 0;
+    val scope = Stack[String]()
+    val types = Scope()
+
+    def usesRef(f: String => String) = {
+        refCount += 1
+        f("$ref" + refCount)
+    }
 }
 
 sealed class CompilerPipeline(stage1: Compiler, stage2: Compiler) extends Compiler {
