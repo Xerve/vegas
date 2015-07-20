@@ -112,5 +112,5 @@ case class ObjectLiteral(val elements: Seq[Tuple2[String, Expression]]) extends 
 
 case class IdentifierLiteral(val identifier: String, val nonVariable: Boolean = false) extends Literal {
     def eval = (if (nonVariable) "" else "$") + identifier
-    val vtype = VAny
+    lazy val vtype = Compiler.types((Compiler.scope :+ eval).mkString("\\")).getOrElse(VAny)
 }
