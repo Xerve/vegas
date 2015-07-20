@@ -7,7 +7,7 @@ package object VNumberPrelude extends Prelude {
     object VNumberPlus extends VMacro("+") {
         def eval(callee: Expression, args: Seq[Expression]) =
             require(args, Seq(VNumber)) {
-                GenericExpression(VNumber, callee.eval + " + " + args.map(_.eval).mkString(" + "))
+                GenericExpression(VNumber, callee.eval + " ++ " + args.map(_.eval).mkString(" + "))
             }
     }
 

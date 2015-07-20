@@ -43,6 +43,11 @@ package object VAnyPrelude extends Prelude {
             GenericExpression(VAny, "(" + callee.eval + " / " + args.map(_.eval).mkString(" / ") + ")")
     }
 
+    object VAnyType extends VMacro("$type") {
+        def eval(callee: Expression, args: Seq[Expression]) =
+            GenericExpression(VString, callee.vtype.toString)
+    }
+
     def init {
         VAny define VAnyPrint
         VAny define VAnyAccessor
@@ -51,5 +56,6 @@ package object VAnyPrelude extends Prelude {
         VAny define VAnyMinus
         VAny define VAnyMultiply
         VAny define VAnyDivide
+        VAny define VAnyType
     }
 }

@@ -53,7 +53,7 @@ abstract class Pattern extends Expression {
 }
 
 case class IdentifierPattern(val identifier: IdentifierLiteral, val t: Option[String], val mut: Boolean) extends Pattern {
-    //Compiler.types.add((Compiler.scope :+ eval).mkString("\\"), t.map(VType getType _), false, mut)
+    Compiler.types.add((Compiler.scope :+ eval).mkString("\\"), t.map(VType getType _), false, mut)
     def eval = identifier.eval
     def decompose(that: Expression) = {
         Compiler.types.add((Compiler.scope :+ eval).mkString("\\"), Some(that.vtype), true)

@@ -31,7 +31,7 @@ class Scope {
             case None => true
             case Some(vtype) => node match {
                 case None => false
-                case Some(nodeType) => nodeType isCompatibleWith vtype
+                case Some(nodeType) => vtype isCompatibleWith nodeType
             }
         }
 
