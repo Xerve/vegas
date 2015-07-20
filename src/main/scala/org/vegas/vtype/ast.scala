@@ -17,7 +17,7 @@ case class GenericExpression(val vtype: VType, val result: String) extends Expre
 }
 
 class NullExpression extends Expression {
-    def eval = "NULL_EXPRESSION"
+    def eval = "null"
     val vtype = VNull
 }
 
@@ -29,13 +29,17 @@ object FunctionCaller {
 }
 
 case class FunctionCall(val callee: Expression, val functions: Seq[FunctionCaller]) extends Expression {
-    val vtype = VAny
-    def eval = (functions.foldLeft(callee) { (expression, caller) =>
-        expression.callMacro(caller.functionName, caller.args) match {
-            case Some(result) => result
-            case None => ast.GenericExpression(VAny, expression.eval + "->" + caller.functionName + "(" + caller.args.map(_.eval).mkString(", ") + ")")
-        }
-    }).eval
+    lazy val result =
+        (functions.foldLeft(callee) { (expression, caller) =>
+            expression.callMacro(caller.functionName, caller.args) match {
+                case Some(result) => result
+                case None => GenericExpression(VAny, expression.eval + "->" + caller.functionName + "(" + caller.args.map(_.eval).mkString(", ") + ")")
+            }
+        })
+
+    lazy val vtype = result.vtype
+
+    def eval = result.eval
 }
 
 case class Binding(val pattern: Pattern, val expression: Expression) extends Expression {
@@ -49,7 +53,7 @@ abstract class Pattern extends Expression {
 }
 
 case class IdentifierPattern(val identifier: IdentifierLiteral, val t: Option[String], val mut: Boolean) extends Pattern {
-    Compiler.types.add((Compiler.scope :+ eval).mkString("\\"), t.map(VType getType _), false, mut)
+    //Compiler.types.add((Compiler.scope :+ eval).mkString("\\"), t.map(VType getType _), false, mut)
     def eval = identifier.eval
     def decompose(that: Expression) = {
         Compiler.types.add((Compiler.scope :+ eval).mkString("\\"), Some(that.vtype), true)

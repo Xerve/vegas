@@ -1,54 +1,48 @@
 package org.vegas.prelude
 
 import org.vegas.vtype._
+import org.vegas.vtype.ast.{Expression, GenericExpression, NullExpression}
 
 package object VAnyPrelude extends Prelude {
-    object VAnyPrint extends VMacro {
-        val name = "print"
-        def eval(callee: ast.Expression, args: Seq[ast.Expression]) =
-            ast.GenericExpression(VAny, "echo " + callee.eval)
+    object VAnyPrint extends VMacro("print") {
+        def eval(callee: Expression, args: Seq[Expression]) =
+            GenericExpression(VAny, "echo " + callee.eval)
     }
 
-    object VAnyAccessor extends VMacro {
-        val name = "."
-        def eval(callee: ast.Expression, args: Seq[ast.Expression]) = {
+    object VAnyAccessor extends VMacro(".") {
+        def eval(callee: Expression, args: Seq[Expression]) = {
             args.headOption match {
-                case Some(head: ast.IdentifierLiteral) => ast.GenericExpression(VAny, callee.eval + "->" + head.identifier)
-                case _ => new ast.NullExpression()
+                case Some(head: ast.IdentifierLiteral) => GenericExpression(VAny, callee.eval + "->" + head.identifier)
+                case _ => new NullExpression()
             }
         }
     }
 
-    object VAnyApply extends VMacro {
-        val name = "$apply"
-        def eval(callee: ast.Expression, args: Seq[ast.Expression]) =
-            ast.GenericExpression(VAny, callee.eval + "(" + args.map(_.eval).mkString(",") + ")")
+    object VAnyApply extends VMacro("$apply") {
+        def eval(callee: Expression, args: Seq[Expression]) =
+            GenericExpression(VAny, callee.eval + "(" + args.map(_.eval).mkString(",") + ")")
     }
 
-    object VAnyPlus extends VMacro {
-        val name = "+"
-        def eval(callee: ast.Expression, args: Seq[ast.Expression]) =
-            ast.GenericExpression(VAny, callee.eval + " + " + args.map(_.eval).mkString(" + "))
+    object VAnyPlus extends VMacro("+") {
+        def eval(callee: Expression, args: Seq[Expression]) =
+            GenericExpression(VAny, callee.eval + " + " + args.map(_.eval).mkString(" + "))
     }
 
-    object VAnyMinus extends VMacro {
-        val name = "-"
-        def eval(callee: ast.Expression, args: Seq[ast.Expression]) =
-            ast.GenericExpression(VAny, callee.eval + " - " + args.map(_.eval).mkString(" + "))
+    object VAnyMinus extends VMacro("-") {
+        def eval(callee: Expression, args: Seq[Expression]) =
+            GenericExpression(VAny, callee.eval + " - " + args.map(_.eval).mkString(" - "))
     }
 
-    object VAnyMultiply extends VMacro {
-        val name = "*"
-        def eval(callee: ast.Expression, args: Seq[ast.Expression]) =
-            ast.GenericExpression(VAny, callee.eval + " * " + args.map(_.eval).mkString(" + "))
+    object VAnyMultiply extends VMacro("*") {
+        def eval(callee: Expression, args: Seq[Expression]) =
+            GenericExpression(VAny, callee.eval + " * " + args.map(_.eval).mkString(" * "))
     }
 
-    object VAnyDivide extends VMacro {
-        val name = "/"
-        def eval(callee: ast.Expression, args: Seq[ast.Expression]) =
-            ast.GenericExpression(VAny, "(" + callee.eval + " / " + args.map(_.eval).mkString(" + ") + ")")
+    object VAnyDivide extends VMacro("/") {
+        def eval(callee: Expression, args: Seq[Expression]) =
+            GenericExpression(VAny, "(" + callee.eval + " / " + args.map(_.eval).mkString(" / ") + ")")
     }
-    
+
     def init {
         VAny define VAnyPrint
         VAny define VAnyAccessor

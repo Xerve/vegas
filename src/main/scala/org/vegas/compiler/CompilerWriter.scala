@@ -2,9 +2,7 @@ package org.vegas.compiler
 
 import java.io.{PrintWriter, File}
 
-trait CompilerWriter {
-    self: Compiler with CompilerReader =>
-
+trait CompilerWriter { self: Compiler with CompilerReader =>
     val extension: String
     def compileToFile {
         compile(source) match {

@@ -7,5 +7,6 @@ abstract class Prelude {
 object Prelude {
     def init {
         VAnyPrelude.init
+        VNumberPrelude.init
     }
 }

@@ -26,13 +26,14 @@ class Scope {
         }
     }
 
-    def isCompatible(node: Option[VType], _vtype: Option[VType]): Boolean = _vtype match {
-        case None => true
-        case Some(vtype) => node match {
-            case None => false
-            case Some(nodeType) => if (nodeType == vtype) true else isCompatible(nodeType.parent, Some(vtype))
+    def isCompatible(node: Option[VType], _vtype: Option[VType]) =
+        _vtype match {
+            case None => true
+            case Some(vtype) => node match {
+                case None => false
+                case Some(nodeType) => nodeType isCompatibleWith vtype
+            }
         }
-    }
 
     def apply(node: String) = nodes.get(node).map(_.vtype).getOrElse(None)
 

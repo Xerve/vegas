@@ -1,16 +1,31 @@
 package org.vegas.vtype
 
+import org.vegas.vtype.ast.{Expression, NullExpression}
 import scala.collection.mutable.Map
 import scala.collection.mutable.MutableList
 
-abstract class VMacro {
-    val name: String
-    def eval(callee: ast.Expression, args: Seq[ast.Expression]): ast.Expression
+abstract class VMacro(val name: String) {
+    def eval(callee: Expression, args: Seq[Expression]): Expression
+    
+    def require(args: Seq[Expression], validator: Seq[VType])(callback: => Expression) =
+        validator zip args forall { case(argType, arg) =>
+            argType isCompatibleWith arg.vtype
+        } match {
+            case true => callback
+            case false => new NullExpression()
+        }
+
     override def toString = s"Macro<$name>"
 }
 
-case class GenericVMacro(val name: String, val function: (ast.Expression, Seq[ast.Expression]) => ast.Expression) extends VMacro {
-    def eval(callee: ast.Expression, args: Seq[ast.Expression]) = function(callee, args)
+case class GenericVMacro(override val name: String,
+                         val function: (Expression, Seq[Expression]) => Expression,
+                         val validator: Seq[VType] = Seq())
+                         extends VMacro(name) {
+    def eval(callee: Expression, args: Seq[Expression]) =
+        require(args, validator) {
+            function(callee, args)
+        }
 }
 
 abstract class VType {
@@ -22,17 +37,23 @@ abstract class VType {
         macros += _macro.name -> _macro
     }
 
-    def define(macroName: String, function: (ast.Expression, Seq[ast.Expression]) => ast.Expression) {
+    def define(macroName: String, function: (Expression, Seq[Expression]) => Expression) {
         macros += macroName -> GenericVMacro(macroName, function)
     }
 
-    def call(macroName: String, callee: ast.Expression, args: Seq[ast.Expression]): Option[ast.Expression] =
+    def call(macroName: String, callee: Expression, args: Seq[Expression]): Option[Expression] =
         macros get macroName match {
             case Some(vmacro) => Some(vmacro.eval(callee, args))
             case None => parent match {
                 case Some(parent) => parent.call(macroName, callee, args)
                 case None => None
             }
+        }
+
+    def isCompatibleWith(vtype: VType): Boolean =
+        if (vtype == this) true else parent match {
+            case Some(parentType) => parentType isCompatibleWith vtype
+            case None => false
         }
 
     override def toString = typename
@@ -55,9 +76,7 @@ object VType {
     }
 }
 
-trait Generic {
-    self: VType =>
-
+trait Generic { self: VType =>
     val types: Seq[VType]
 }
 
@@ -91,7 +110,7 @@ object VBoolean extends VType {
     def unapply(sample: String) = if (sample matches """^(yes|no|on|off|true|false)$""") Some(this) else None
 }
 
-abstract class VCollection[T <: Traversable[ast.Expression]] extends VType with Generic {
+abstract class VCollection[T <: Traversable[Expression]] extends VType with Generic {
     val children: T
 }
 
@@ -100,7 +119,7 @@ object VCollection extends VType {
     val typename = "Collection"
 }
 
-case class VArray(val children: Seq[ast.Expression]) extends VCollection[Seq[ast.Expression]] {
+case class VArray(val children: Seq[Expression]) extends VCollection[Seq[Expression]] {
     val parent = Some(VCollection)
     val types = children.map(_.vtype)
     val typename = "Array[" + types.mkString(", ") + "]"

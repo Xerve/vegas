@@ -46,7 +46,6 @@ object vegasc extends App {
         println(Compiler.types)
         println("")
         println(log)
-        println(vtype.VAny.macros)
     }
 
     def compileStage(stage: String, filename: String) {
