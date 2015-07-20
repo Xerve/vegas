@@ -7,7 +7,7 @@ class StringLoader extends Compiler {
 
     def compile(source: String) =
         Some(stringContent replaceAllIn (source, { content =>
-            Compiler.stringStorage push content.toString()
+            Compiler.stringStorage += content.toString()
             "\"STRING_CONTENT_" + Compiler.stringStorage.length.toString() + "\""
         }))
 }

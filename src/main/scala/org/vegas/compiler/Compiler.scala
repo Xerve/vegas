@@ -1,7 +1,7 @@
 package org.vegas.compiler
 
 import java.io.{PrintWriter, File}
-import scala.collection.mutable.Stack
+import scala.collection.mutable.{Queue, Stack}
 import org.vegas.vegasc
 import org.vegas.vtype.Scope
 
@@ -18,7 +18,7 @@ object Compiler {
     var refCount = 0;
     val scope = Stack[String]()
     val types = Scope()
-    val stringStorage = Stack[String]()
+    val stringStorage = Queue[String]()
 
     def usesRef(f: String => String) = {
         refCount += 1

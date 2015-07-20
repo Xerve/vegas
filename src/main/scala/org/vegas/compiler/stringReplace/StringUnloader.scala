@@ -8,8 +8,7 @@ class StringUnloader extends Compiler {
 
     def compile(source: String) =
         Some(stringContent replaceAllIn (source, { m =>
-            val index = m group "index"
-            Compiler.stringStorage(index.toInt - 1)
+            Compiler.stringStorage.dequeue
         }))
 }
 
