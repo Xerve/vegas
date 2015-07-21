@@ -1,6 +1,6 @@
 # Vegas compiler
 
-[![Codacy Badge](https://www.codacy.com/project/badge/3292bdb90f5d46ad9929ccd71ec8425f)](https://www.codacy.com/app/rrdelaney/vegas)
+[![Codacy Badge](https://www.codacy.com/project/badge/1abbaf9cfe93479ebf539e2095b31ff5)](https://www.codacy.com/app/rrdelaney/vegas)
 
 A language that compiles to PHP lol
 
