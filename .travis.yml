@@ -6,7 +6,7 @@ scala:
 sudo: false
 
 script:
-    - sbt clean coverage test
+    - sbt ++$TRAVIS_SCALA_VERSION clean coverage test
 
 after_success:
     - sbt coverageReport
