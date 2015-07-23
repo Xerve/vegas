@@ -5,6 +5,9 @@ scala:
 
 sudo: false
 
+before_script:
+    - echo $TRAVIS_SCALA_VERSION
+
 script:
     - sbt ++$TRAVIS_SCALA_VERSION clean coverage test
 
