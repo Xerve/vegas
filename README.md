@@ -1,5 +1,6 @@
 # Vegas compiler
 
+[![Build Status](https://travis-ci.org/rrdelaney/vegas.svg?branch=master)](https://travis-ci.org/rrdelaney/vegas)
 [![Codacy Badge](https://www.codacy.com/project/badge/1abbaf9cfe93479ebf539e2095b31ff5)](https://www.codacy.com/app/rrdelaney/vegas)
 
 A language that compiles to PHP lol
