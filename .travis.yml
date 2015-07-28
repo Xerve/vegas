@@ -13,4 +13,5 @@ script:
 
 after_success:
     - bash <(curl -s https://codecov.io/bash)
+    - sbt coveralls
     - sbt coverageReport codacyCoverage
