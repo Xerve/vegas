@@ -1,6 +1,6 @@
 package org.vegas
 
-import org.vegas.compiler.{Compiler, CompilerOptions, FileReader, FileWriter, PassThru}
+import org.vegas.compiler.{Compiler, CompilerOptions, FileReader, FileWriter, PassThru, StdOut}
 import org.vegas.compiler.stringReplace.{StringLoader, StringUnloader}
 import org.vegas.compiler.apply.{ApplyCompiler, ApplyFileCompiler}
 import org.vegas.compiler.braces.{BracesCompiler, BracesFileCompiler}
@@ -13,7 +13,7 @@ import org.vegas.vtype.ast
 object vegasc extends App {
     val version = "0.0.0"
 
-    implicit val options = CompilerOptions(args)
+    val options = CompilerOptions(args)
                   .alias("v", "version")
                   .description("version", "Prints the version number")
                   .alias("h", "help")
@@ -31,21 +31,23 @@ object vegasc extends App {
 
     def compileFile(filename: String) {
         def c(compiler: Compiler, switch: String) =
-            if (options hasFlag switch) PassThru() else compiler
+            if (options hasFlag switch) PassThru else compiler
 
         FileReader(filename) >>:
-        StringLoader() >>:
+        c(StringLoader(), "--no-strings") >>:
         c(ApplyCompiler(), "--no-apply") >>:
         c(CommentCompiler(), "--no-comment") >>:
         c(BracesCompiler(), "--no-braces") >>:
         c(SemicolonCompiler(), "--no-semicolons") >>:
-        StringUnloader() >>:
+        c(StringUnloader(), "--no-strings") >>:
         c(StageNCompiler(), "--no-stageN") >>:
-        FileWriter(filename)
+        (if (options hasFlag "--stdout") StdOut else FileWriter(filename))
 
-        println(Compiler.types)
-        println("")
-        println(log)
+        if (options hasFlag "--debug") {
+            println(Compiler.types)
+            println("")
+            println(log)
+        }
     }
 
     def compileStage(stage: String, filename: String) {

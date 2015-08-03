@@ -1,15 +1,14 @@
 package org.vegas.compiler.scope
 
-import org.vegas.compiler.{Compiler, FileCompiler}
+import org.vegas.compiler.{Compiler, FileCompiler, StaticCompiler}
 
 class ScopeCompiler extends Compiler {
     def compile(source: String) =
         Some(source)
 }
 
-object ScopeCompiler {
+object ScopeCompiler extends StaticCompiler {
     implicit lazy val compiler = new ScopeCompiler()
-    def apply() = compiler
 }
 
 case class ScopeFileCompiler(val filename: String)

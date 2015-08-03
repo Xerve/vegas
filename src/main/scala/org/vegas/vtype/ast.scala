@@ -63,10 +63,11 @@ case class IdentifierPattern(val identifier: IdentifierLiteral, val t: Option[St
 }
 
 case class ArrayPattern(val identifiers: Seq[IdentifierPattern]) extends Pattern {
-    def decompose(that: Expression) = Compiler.usesRef { ref =>
+    def decompose(that: Expression) = {
+        val ref = Compiler.usesRef
         ref + " = " + that.eval + ";" +
         identifiers.zipWithIndex.map {
-            case (identifier, index) => identifier.eval + " = " + ref + "[" + index + "];"
+            case (identifier, index) => identifier.eval + " = $" + ref + "[" + index + "];"
         }.mkString.init
     }
 
