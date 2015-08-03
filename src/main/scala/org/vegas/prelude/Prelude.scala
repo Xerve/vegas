@@ -8,5 +8,6 @@ object Prelude {
     def init {
         VAnyPrelude.init
         VNumberPrelude.init
+        VStringPrelude.init
     }
 }

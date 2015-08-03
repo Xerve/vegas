@@ -20,10 +20,21 @@ object Compiler {
     val types = Scope()
     val stringStorage = Queue[String]()
 
-    def usesRef(f: String => String) = {
+    def usesRef = {
         refCount += 1
-        f("$ref" + refCount)
+        "$__ref" + refCount
     }
+
+    def usesFunctionRef = {
+        refCount += 1
+        "__ref" + refCount
+    }
+}
+
+trait StaticCompiler {
+    val compiler: Compiler
+    def apply() = compiler
+    def apply(source: String) = compiler.compile(source) getOrElse ""
 }
 
 sealed class CompilerPipeline(stage1: Compiler, stage2: Compiler) extends Compiler {
@@ -39,16 +50,19 @@ case class FileReader(val filename: String) extends Compiler
 case class FileWriter(val filename: String) extends Compiler {
     def compile(source: String) = {
         val writer = new PrintWriter(new File(filename + ".php"))
-        writer.write("<?php\n" + source)
+        writer.write(source)
         writer.close()
         Some("Success!")
     }
 }
 
-class PassThru extends Compiler {
+object PassThru extends Compiler {
     def compile(source: String) = Some(source)
 }
 
-object PassThru {
-    def apply() = new PassThru()
+object StdOut extends Compiler {
+    def compile(source: String) = {
+        println(source)
+        Some("Success!")
+    }
 }
