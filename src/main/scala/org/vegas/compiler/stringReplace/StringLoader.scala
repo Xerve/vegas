@@ -1,6 +1,6 @@
 package org.vegas.compiler.stringReplace
 
-import org.vegas.compiler.Compiler
+import org.vegas.compiler.{Compiler, StaticCompiler}
 
 class StringLoader extends Compiler {
     val stringContent = """\"(\\.|[^\"])*\"""".r
@@ -12,6 +12,6 @@ class StringLoader extends Compiler {
         }))
 }
 
-object StringLoader {
-    def apply() = new StringLoader()
+object StringLoader extends StaticCompiler {
+    val compiler  = new StringLoader()
 }

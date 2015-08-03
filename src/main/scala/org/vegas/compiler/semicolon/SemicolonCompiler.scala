@@ -1,6 +1,6 @@
 package org.vegas.compiler.semicolon
 
-import org.vegas.compiler.{Compiler, FileCompiler}
+import org.vegas.compiler.{Compiler, FileCompiler, StaticCompiler}
 
 class SemicolonCompiler extends Compiler {
     def compile(source: String) =
@@ -21,9 +21,8 @@ class SemicolonCompiler extends Compiler {
         }) + ";").replaceAllLiterally(";;", ";"))
 }
 
-object SemicolonCompiler {
+object SemicolonCompiler extends StaticCompiler {
     implicit lazy val compiler = new SemicolonCompiler()
-    def apply() = compiler
 }
 
 case class SemicolonFileCompiler(val filename: String)
