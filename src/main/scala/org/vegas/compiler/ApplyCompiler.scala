@@ -1,6 +1,4 @@
-package org.vegas.compiler.apply
-
-import org.vegas.compiler.{Compiler, FileCompiler, StaticCompiler}
+package org.vegas.compiler
 
 class ApplyCompiler extends Compiler {
     val functionCall = """([\w\.\!]+)(\([\s\S]*\))""".r
@@ -16,8 +14,5 @@ class ApplyCompiler extends Compiler {
 }
 
 object ApplyCompiler extends StaticCompiler {
-    implicit lazy val compiler = new ApplyCompiler()
+    lazy val compiler = new ApplyCompiler()
 }
-
-case class ApplyFileCompiler(val filename: String)
-    extends FileCompiler[ApplyCompiler]("apply")

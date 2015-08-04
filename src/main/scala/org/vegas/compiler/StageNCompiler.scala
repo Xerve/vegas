@@ -1,6 +1,5 @@
-package org.vegas.compiler.stageN
+package org.vegas.compiler
 
-import org.vegas.compiler.{Compiler, FileCompiler, StaticCompiler}
 import org.vegas.vtype.ast
 import org.parboiled2.ParseError
 import scala.util.{Success, Failure}
@@ -19,8 +18,5 @@ class StageNCompiler extends Compiler {
 }
 
 object StageNCompiler extends StaticCompiler {
-    implicit lazy val compiler = new StageNCompiler()
+    lazy val compiler = new StageNCompiler()
 }
-
-case class StageNFileCompiler(val filename: String)
-    extends FileCompiler[StageNCompiler]("stageN")

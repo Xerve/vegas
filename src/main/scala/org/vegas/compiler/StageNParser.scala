@@ -1,4 +1,4 @@
-package org.vegas.compiler.stageN
+package org.vegas.compiler
 
 import org.vegas.vtype.ast
 import org.parboiled2._
@@ -10,7 +10,7 @@ class StageNParser(val input: ParserInput) extends Parser {
 
     def Expression: Rule1[ast.Expression] = rule {
         (quiet('(') ~ Whitespace ~ Expression ~ Whitespace ~ quiet(')')) |
-        CompilerHint |
+        //CompilerHint |
         FunctionCall |
         Block |
         Literal |
@@ -100,7 +100,7 @@ class StageNParser(val input: ParserInput) extends Parser {
         "(" ~ (Expression + (',' ~ Whitespace)) ~ ")" ~> (ast.FunctionCaller("", _: Seq[ast.Expression]))
     }
 
-    def CompilerHint = rule { "#[" ~ capture(oneOrMore(CharPredicate.AlphaNum)) ~ ']' ~ Whitespace ~ (('<' ~ capture(oneOrMore(CharPredicate.AlphaNum)) ~ '>') * Whitespace) ~> (hint(_, _)) }
+    //def CompilerHint = rule { "#[" ~ capture(oneOrMore(CharPredicate.AlphaNum)) ~ ']' ~ Whitespace ~ (('<' ~ capture(oneOrMore(CharPredicate.AlphaNum)) ~ '>') * Whitespace) ~> (ast.hint(_, _)) }
 
     def Block = rule { '{' ~ Whitespace ~ zeroOrMore(Expression ~ ';' ~ Whitespace) ~ '}' ~> (ast.Block(_)) }
 }

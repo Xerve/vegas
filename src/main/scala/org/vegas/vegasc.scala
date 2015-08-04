@@ -1,12 +1,12 @@
 package org.vegas
 
 import org.vegas.compiler.{Compiler, CompilerOptions, FileReader, FileWriter, PassThru, StdOut}
-import org.vegas.compiler.stringReplace.{StringLoader, StringUnloader}
-import org.vegas.compiler.apply.{ApplyCompiler, ApplyFileCompiler}
-import org.vegas.compiler.braces.{BracesCompiler, BracesFileCompiler}
-import org.vegas.compiler.semicolon.{SemicolonCompiler, SemicolonFileCompiler}
-import org.vegas.compiler.comment.{CommentCompiler, CommentFileCompiler}
-import org.vegas.compiler.stageN.{StageNCompiler, StageNFileCompiler}
+import org.vegas.compiler.{StringLoader, StringUnloader}
+import org.vegas.compiler.ApplyCompiler
+import org.vegas.compiler.BracesCompiler
+import org.vegas.compiler.SemicolonCompiler
+import org.vegas.compiler.CommentCompiler
+import org.vegas.compiler.StageNCompiler
 import org.vegas.prelude.Prelude
 import org.vegas.vtype.ast
 

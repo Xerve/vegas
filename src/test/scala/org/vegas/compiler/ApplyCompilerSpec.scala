@@ -2,7 +2,6 @@ package org.vegas.compiler
 
 import org.scalatest._
 import org.vegas.UnitTest
-import org.vegas.compiler.apply.ApplyCompiler
 
 class ApplyCompilerSpec extends UnitTest {
     "ApplyCompiler" should "replace a pattern with $apply" in {

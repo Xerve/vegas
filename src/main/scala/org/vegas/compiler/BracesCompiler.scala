@@ -1,6 +1,4 @@
-package org.vegas.compiler.braces
-
-import org.vegas.compiler.{Compiler, FileCompiler, StaticCompiler}
+package org.vegas.compiler
 
 class BracesCompiler extends Compiler {
     def compile(source: String) =
@@ -19,8 +17,5 @@ class BracesCompiler extends Compiler {
 }
 
 object BracesCompiler extends StaticCompiler {
-    implicit lazy val compiler = new BracesCompiler()
+    lazy val compiler = new BracesCompiler()
 }
-
-case class BracesFileCompiler(val filename: String)
-    extends FileCompiler[BracesCompiler]("braces")

@@ -1,6 +1,5 @@
-package org.vegas.compiler.stringReplace
+package org.vegas.compiler
 
-import org.vegas.compiler.{Compiler, StaticCompiler}
 import scala.util.matching.Regex
 
 class StringUnloader extends Compiler {

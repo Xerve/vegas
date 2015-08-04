@@ -1,6 +1,4 @@
-package org.vegas.compiler.comment
-
-import org.vegas.compiler.{Compiler, FileCompiler, StaticCompiler}
+package org.vegas.compiler
 
 class CommentCompiler extends Compiler {
     def compile(source: String) =
@@ -31,8 +29,5 @@ class CommentCompiler extends Compiler {
 }
 
 object CommentCompiler extends StaticCompiler {
-    implicit lazy val compiler = new CommentCompiler()
+    lazy val compiler = new CommentCompiler()
 }
-
-case class CommentFileCompiler(val filename: String)
-extends FileCompiler[CommentCompiler]("comment")
