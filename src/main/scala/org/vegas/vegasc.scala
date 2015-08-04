@@ -1,12 +1,6 @@
 package org.vegas
 
-import org.vegas.compiler.{Compiler, FileReader, FileWriter, PassThru, StdOut}
-import org.vegas.compiler.{StringLoader, StringUnloader}
-import org.vegas.compiler.ApplyCompiler
-import org.vegas.compiler.BracesCompiler
-import org.vegas.compiler.SemicolonCompiler
-import org.vegas.compiler.CommentCompiler
-import org.vegas.compiler.StageNCompiler
+import org.vegas.compiler._
 import org.vegas.prelude.Prelude
 import org.vegas.vtype.ast
 
@@ -37,7 +31,7 @@ object vegasc extends App {
             if (options hasFlag "--just") {
                 if (options hasFlag "--" + switch) compiler else PassThru
             } else {
-                if (options hasFlag "--no=" + switch) PassThru else compiler
+                if (options hasFlag "--no-" + switch) PassThru else compiler
             }
 
         FileReader(filename) >>:

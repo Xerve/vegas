@@ -121,11 +121,7 @@ case class IdentifierLiteral(val identifier: String, val nonVariable: Boolean = 
 }
 
 case class Block(body: Seq[Expression]) extends Expression {
-    def eval = "{\n" + (body.length match {
-        case 0 => ""
-        case 1 => "return " + body.head.eval + ";\n"
-        case _ => body.init.map(_.eval).mkString(";\n") + "return " + body.last.eval + ";\n"
-    }) + "}"
+    def eval = "{\n" + body.map(_.eval).mkString(";\n") + "\n}"
 
     val vtype = VBlock(body.lastOption.map(_.vtype) getOrElse VNull)
 }

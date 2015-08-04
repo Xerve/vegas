@@ -97,6 +97,12 @@ object VNull extends VType {
     def unapply(sample: String) = if (sample == "null") Some(this) else None
 }
 
+object Vegas extends VType {
+    val parent = None
+    val typename = "Vegas"
+    def unapply(sample: String) = None
+}
+
 object VNumber extends VType {
     val parent = Some(VAny)
     val typename = "Number"

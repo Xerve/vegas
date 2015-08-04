@@ -89,15 +89,14 @@ class StageNParser(val input: ParserInput) extends Parser {
 
     def ArrayPattern = rule { "[" ~ (IdentifierPattern + ("," ~ Whitespace)) ~ "]" ~> (ast.ArrayPattern(_)) }
 
-    def FunctionCall = rule {
+    def FunctionCall: Rule1[ast.FunctionCall] = rule {
         Literal ~ Whitespace ~ (FunctionCaller + Whitespace) ~> (ast.FunctionCall(_, _))
     }
 
     def FunctionCaller: Rule1[ast.FunctionCaller] = rule {
         (capture(OperatorName) ~ Whitespace ~ Literal ~> (ast.FunctionCaller(_, _))) |
         (capture(OperatorName) ~ Whitespace ~ Expression ~> (ast.FunctionCaller(_, _))) |
-        (capture(FunctionName) ~ Whitespace ~ (Expression * (',' ~ Whitespace)) ~> (ast.FunctionCaller(_: String, _: Seq[ast.Expression]))) |
-        "(" ~ (Expression + (',' ~ Whitespace)) ~ ")" ~> (ast.FunctionCaller("", _: Seq[ast.Expression]))
+        (capture(FunctionName) ~ Whitespace ~ (Expression * (',' ~ Whitespace)) ~> (ast.FunctionCaller(_: String, _: Seq[ast.Expression])))
     }
 
     //def CompilerHint = rule { "#[" ~ capture(oneOrMore(CharPredicate.AlphaNum)) ~ ']' ~ Whitespace ~ (('<' ~ capture(oneOrMore(CharPredicate.AlphaNum)) ~ '>') * Whitespace) ~> (ast.hint(_, _)) }
