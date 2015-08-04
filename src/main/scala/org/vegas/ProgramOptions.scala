@@ -22,6 +22,7 @@ case class ProgramOptions(val name: String, val version: String, val args: Array
 
     private def parseFlags(program: List[String]): List[Tuple2[Option[String], Option[String]]] = program match {
         case Nil => Nil
+        case "--" :: tail => tail map ((None -> Some(_)))
         case flag :: Nil if isFlag(flag) => (Some(flag) -> None) :: Nil
         case argument :: Nil => (None -> Some(argument)) :: Nil
         case flag :: option :: tail if isFlag(flag) && !isFlag(option) => (Some(flag) -> Some(option)) :: parseFlags(tail)

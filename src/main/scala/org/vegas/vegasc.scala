@@ -24,11 +24,7 @@ object vegasc extends App {
 
     if (options hasFlag "-v") options.printVersion
     if (options hasFlag "-h") options.printHelp
-
-    args.length match {
-        case 0 => options.printVersion; options.printHelp
-        case _ => options.arguments foreach (compileFile(_))
-    }
+    if (args.isEmpty) options.printHelp else options.arguments foreach (compileFile(_))
 
     if (options hasFlag "--debug") {
         println(Compiler.scope)
