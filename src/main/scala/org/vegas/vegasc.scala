@@ -11,9 +11,10 @@ import org.vegas.prelude.Prelude
 import org.vegas.vtype.ast
 
 object vegasc extends App {
-    val version = "0.0.0"
+    val name = "Vegas Compiler"
+    val version = "0.1.0"
 
-    val options = ProgramOptions(args)
+    val options = ProgramOptions(name, version, args)
                   .alias("v", "version")
                   .description("version", "Prints the version number")
                   .alias("h", "help")
@@ -21,10 +22,18 @@ object vegasc extends App {
 
     Prelude.init
 
+    if (options hasFlag "-v") options.printVersion
+    if (options hasFlag "-h") options.printHelp
+
     args.length match {
-        case 0 => options.printHelp
-        case 1 if args(0).startsWith("-") => parseFlag(args(0))
-        case _ => compileFile(args(0))
+        case 0 => options.printVersion; options.printHelp
+        case _ => options.arguments foreach (compileFile(_))
+    }
+
+    if (options hasFlag "--debug") {
+        println(Compiler.scope)
+        println("")
+        println(log)
     }
 
     def compileFile(filename: String) {
@@ -44,21 +53,5 @@ object vegasc extends App {
         c(StringUnloader(), "strings") >>:
         c(StageNCompiler(), "stageN") >>:
         (if (options hasFlag "--stdout") StdOut else FileWriter(filename))
-
-        if (options hasFlag "--debug") {
-            println(Compiler.scope)
-            println("")
-            println(log)
-        }
     }
-
-    def parseFlag(flag: String) =
-        flag match {
-            case "-v" | "--version" => printVersion
-            case "-h" | "--help" => options.printHelp
-            case _ => println(s"Unknown flag: $flag")
-        }
-
-    def printVersion =
-        println(s"Vegas Compiler $version")
 }

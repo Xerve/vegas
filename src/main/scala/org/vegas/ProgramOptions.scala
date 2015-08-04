@@ -2,15 +2,37 @@ package org.vegas
 
 import scala.collection.mutable.Map
 
-case class ProgramOptions(val args: Array[String]) {
+case class ProgramOptions(val name: String, val version: String, val args: Array[String]) {
     val shortFlag = """-(\w)"""
     val longFlag = """--([\w-]+)"""
+
+    val parsedFlags = parseFlags(args.toList)
+
+    val flags = parsedFlags.toMap map { case (key, value) =>
+        key.getOrElse("") -> value
+    } filterKeys (_ != "")
+
+    val arguments = parsedFlags filter { case (flag, option) =>
+        flag.isEmpty
+    } map { case (key, value) =>
+        value getOrElse ""
+    }
+
+    private def isFlag(arg: String) = (arg matches """^-(\w)$""") || (arg matches """^--([\w-]+)$""")
+
+    private def parseFlags(program: List[String]): List[Tuple2[Option[String], Option[String]]] = program match {
+        case Nil => Nil
+        case flag :: Nil if isFlag(flag) => (Some(flag) -> None) :: Nil
+        case argument :: Nil => (None -> Some(argument)) :: Nil
+        case flag :: option :: tail if isFlag(flag) && !isFlag(option) => (Some(flag) -> Some(option)) :: parseFlags(tail)
+        case flag :: tail if isFlag(flag) =>  (Some(flag) -> None) :: parseFlags(tail)
+        case argument :: tail => (None -> Some(argument)) :: parseFlags(tail)
+    }
 
     val aliases: Map[String, String] = Map()
     val reverseAliases: Map[String, String] = Map()
     val defaults: Map[String, String] = Map()
     val descriptions: Map[String, String] = Map()
-    lazy val flags: scala.collection.immutable.Map[String, Option[String]] = parseFlags()
 
     protected def chain(f: => Unit) = {
         f
@@ -30,24 +52,9 @@ case class ProgramOptions(val args: Array[String]) {
         descriptions += (flag -> desc)
     }
 
-    def parseFlags() = {
-        def isFlag(arg: String) = (arg matches """-(\w)""") || (arg matches """--([\w-]+)""")
-
-        val flags = (for (arg <- args.sliding(2)
-            if isFlag(arg.head)
-        ) yield arg.lastOption match {
-            case Some(flag) => arg.head -> (if (isFlag(flag)) None else Some(flag))
-            case None => arg.head -> None
-        }).toMap
-
-        flags + (args.last -> None)
-    }
-
     def apply(flag: String) = flags get flag
 
     def hasFlag(flag: String) = flags contains flag
-
-    override def toString = "Options given:\n    " + flags.mkString("\n    ")
 
     def printHelp { println(
         "Usage:\n" +
@@ -57,4 +64,8 @@ case class ProgramOptions(val args: Array[String]) {
             "        " + text + "\n"
         }.mkString
     )}
+
+    def printVersion {
+        println(s"$name $version")
+    }
 }
