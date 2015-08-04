@@ -6,7 +6,7 @@ import scala.collection.mutable.MutableList
 
 abstract class VMacro(val name: String) {
     def eval(callee: Expression, args: Seq[Expression]): Expression
-    
+
     def require(args: Seq[Expression], validator: Seq[VType])(callback: => Expression) =
         validator zip args forall { case(argType, arg) =>
             argType isCompatibleWith arg.vtype
@@ -80,6 +80,11 @@ trait Generic { self: VType =>
     val types: Seq[VType]
 }
 
+trait Higher { self: VType =>
+    val args: Seq[VType]
+    val result: VType
+}
+
 object VAny extends VType {
     val parent = None
     val typename = "Any"
@@ -124,4 +129,10 @@ case class VArray(val children: Seq[Expression]) extends VCollection[Seq[Express
     val types = children.map(_.vtype)
     val typename = "Array[" + types.mkString(", ") + "]"
     def unapply(sample: String) = if (sample matches """^\[[\w\W]*\]$""") Some(this) else None
+}
+
+case class VBlock(val result: VType) extends VType with Higher {
+    val parent = Some(VAny)
+    val typename = "Block[" + result + "]"
+    val args = Seq()
 }

@@ -33,7 +33,11 @@ case class FunctionCall(val callee: Expression, val functions: Seq[FunctionCalle
         (functions.foldLeft(callee) { (expression, caller) =>
             expression.callMacro(caller.functionName, caller.args) match {
                 case Some(result) => result
-                case None => GenericExpression(VAny, expression.eval + "->" + caller.functionName + "(" + caller.args.map(_.eval).mkString(", ") + ")")
+                case None => GenericExpression(VAny, expression.eval +
+                    (if (caller.functionName != "") "->" else "") +
+                    caller.functionName +
+                    "(" + caller.args.map(_.eval).mkString(", ") + ")"
+                )
             }
         })
 
@@ -53,10 +57,10 @@ abstract class Pattern extends Expression {
 }
 
 case class IdentifierPattern(val identifier: IdentifierLiteral, val t: Option[String], val mut: Boolean) extends Pattern {
-    Compiler.types.add((Compiler.scope :+ eval).mkString("\\"), t.map(VType getType _), false, mut)
+    Compiler.scope.add(eval, t.map(VType getType _), false, mut)
     def eval = identifier.eval
     def decompose(that: Expression) = {
-        Compiler.types.add((Compiler.scope :+ eval).mkString("\\"), Some(that.vtype), true)
+        Compiler.scope.add(eval, Some(that.vtype), true)
         identifier.eval + " = " + that.eval
     }
 
@@ -113,5 +117,15 @@ case class ObjectLiteral(val elements: Seq[Tuple2[String, Expression]]) extends 
 
 case class IdentifierLiteral(val identifier: String, val nonVariable: Boolean = false) extends Literal {
     def eval = (if (nonVariable) "" else "$") + identifier
-    lazy val vtype = Compiler.types((Compiler.scope :+ eval).mkString("\\")).getOrElse(VAny)
+    lazy val vtype = Compiler.scope(eval).getOrElse(VAny)
+}
+
+case class Block(body: Seq[Expression]) extends Expression {
+    def eval = "{\n" + (body.length match {
+        case 0 => ""
+        case 1 => "return " + body.head.eval + ";\n"
+        case _ => body.init.map(_.eval).mkString(";\n") + "return " + body.last.eval + ";\n"
+    }) + "}"
+
+    val vtype = VBlock(body.lastOption.map(_.vtype) getOrElse VNull)
 }

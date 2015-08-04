@@ -2,14 +2,17 @@ package org.vegas.vtype
 
 import org.parboiled2.Parser
 import org.vegas.log
-import scala.collection.mutable.Map
+import scala.collection.mutable.{Map, Stack}
+
 
 sealed case class Node(val vtype: Option[VType], val mut: Boolean, val assigned: Boolean)
 
 class Scope {
+    val scope = Stack[String]()
     val nodes: Map[String, Node] = Map()
 
-    def add(name: String, vtype: Option[VType], assign: Boolean = false, mut: Boolean = false) {
+    def add(_name: String, vtype: Option[VType], assign: Boolean = false, mut: Boolean = false) {
+        val name = _name + scope.mkString("\\")
         nodes get name match {
             case Some(node) if node.mut && !node.vtype.isEmpty && !isCompatible(node.vtype, vtype) =>
                 log(s"Trying to assign $name with incompatible types", s"${node.vtype} to $vtype")
@@ -35,7 +38,17 @@ class Scope {
             }
         }
 
-    def apply(node: String) = nodes.get(node).map(_.vtype).getOrElse(None)
+    def push(namespace: String) {
+        scope push namespace
+    }
+
+    def pop {
+        scope.pop
+    }
+
+    def apply(name: String) = {
+        nodes.get(name).orElse(nodes.get(scope.mkString("\\"))).map(_.vtype) getOrElse None
+    }
 
     override def toString =
         "Scope:\n" +

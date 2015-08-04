@@ -24,40 +24,31 @@ object vegasc extends App {
     args.length match {
         case 0 => options.printHelp
         case 1 if args(0).startsWith("-") => parseFlag(args(0))
-        case 1 => compileFile(args(0))
-        case 2 if args(0).startsWith("--stage-") => compileStage(args(0), args(1))
         case _ => compileFile(args(0))
     }
 
     def compileFile(filename: String) {
         def c(compiler: Compiler, switch: String) =
-            if (options hasFlag switch) PassThru else compiler
+            if (options hasFlag "--just") {
+                if (options hasFlag "--" + switch) compiler else PassThru
+            } else {
+                if (options hasFlag "--no=" + switch) PassThru else compiler
+            }
 
         FileReader(filename) >>:
-        c(StringLoader(), "--no-strings") >>:
-        c(ApplyCompiler(), "--no-apply") >>:
-        c(CommentCompiler(), "--no-comment") >>:
-        c(BracesCompiler(), "--no-braces") >>:
-        c(SemicolonCompiler(), "--no-semicolons") >>:
-        c(StringUnloader(), "--no-strings") >>:
-        c(StageNCompiler(), "--no-stageN") >>:
+        c(StringLoader(), "strings") >>:
+        c(ApplyCompiler(), "apply") >>:
+        c(CommentCompiler(), "comment") >>:
+        c(BracesCompiler(), "braces") >>:
+        c(SemicolonCompiler(), "semicolons") >>:
+        c(StringUnloader(), "strings") >>:
+        c(StageNCompiler(), "stageN") >>:
         (if (options hasFlag "--stdout") StdOut else FileWriter(filename))
 
         if (options hasFlag "--debug") {
-            println(Compiler.types)
+            println(Compiler.scope)
             println("")
             println(log)
-        }
-    }
-
-    def compileStage(stage: String, filename: String) {
-        stage.stripPrefix("--stage-") match {
-            case "apply" => ApplyFileCompiler(filename).compileToFile
-            case "comment" => CommentFileCompiler(filename).compileToFile
-            case "braces" => BracesFileCompiler(filename).compileToFile
-            case "semicolon" => SemicolonFileCompiler(filename).compileToFile
-            case "stageN" => StageNFileCompiler(filename).compileToFile
-            case _ => println(s"Cannot find compiler stage $stage")
         }
     }
 

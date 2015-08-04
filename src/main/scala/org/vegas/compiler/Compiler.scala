@@ -1,7 +1,7 @@
 package org.vegas.compiler
 
 import java.io.{PrintWriter, File}
-import scala.collection.mutable.{Queue, Stack}
+import scala.collection.mutable.Queue
 import org.vegas.vegasc
 import org.vegas.vtype.Scope
 
@@ -16,8 +16,7 @@ abstract class Compiler {
 
 object Compiler {
     var refCount = 0;
-    val scope = Stack[String]()
-    val types = Scope()
+    val scope = Scope()
     val stringStorage = Queue[String]()
 
     def usesRef = {

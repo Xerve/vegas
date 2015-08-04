@@ -12,6 +12,7 @@ class StageNParser(val input: ParserInput) extends Parser {
         (quiet('(') ~ Whitespace ~ Expression ~ Whitespace ~ quiet(')')) |
         CompilerHint |
         FunctionCall |
+        Block |
         Literal |
         Binding
     }
@@ -22,8 +23,8 @@ class StageNParser(val input: ParserInput) extends Parser {
         StringLiteral ~> (ast.StringLiteral(_)) |
         NullLiteral ~> (ast.NullLiteral(_)) |
         BooleanLiteral ~> (ast.BooleanLiteral(_)) |
-        ArrayLiteral ~> (ast.ArrayLiteral(_)) |
-        ObjectLiteral ~> (ast.ObjectLiteral(_))
+        ObjectLiteral ~> (ast.ObjectLiteral(_)) |
+        ArrayLiteral ~> (ast.ArrayLiteral(_))
     }
 
     def Keyword = rule {
@@ -44,7 +45,7 @@ class StageNParser(val input: ParserInput) extends Parser {
     }
 
     def OperatorName = rule {
-        oneOrMore(CharPredicate(".<>*&%+-|"))
+        oneOrMore(CharPredicate(".<>*&%+-|?:"))
     }
 
     def Whitespace = rule { quiet(zeroOrMore(CharPredicate(" \n\r\t\f"))) }
@@ -65,9 +66,9 @@ class StageNParser(val input: ParserInput) extends Parser {
 
     def BooleanKeyword = rule { atomic("true") | atomic("yes") | atomic("on") | atomic("false") | atomic("no") | atomic("off") }
 
-    def ArrayLiteral = rule { '[' ~ Whitespace ~ (Expression + (',' ~ Whitespace)) ~ Whitespace ~ ']' }
+    def ArrayLiteral = rule { '[' ~ Whitespace ~ (Expression + (',' ~ Whitespace)) ~ Whitespace ~ ';' ~ Whitespace ~ ']' }
 
-    def ObjectLiteral = rule { '{' ~ Whitespace ~ (ObjectAttribute + (',' ~ Whitespace)) ~ Whitespace ~ ';' ~ Whitespace ~ '}' }
+    def ObjectLiteral = rule { '[' ~ Whitespace ~ (ObjectAttribute + (',' ~ Whitespace)) ~ Whitespace ~ ';' ~ Whitespace ~ ']' }
 
     def ObjectAttribute = rule { (capture(Identifier) | StringLiteral) ~ Whitespace ~ atomic("=>") ~ Whitespace ~ Expression ~> (Tuple2(_, _)) }
 
@@ -95,8 +96,11 @@ class StageNParser(val input: ParserInput) extends Parser {
     def FunctionCaller: Rule1[ast.FunctionCaller] = rule {
         (capture(OperatorName) ~ Whitespace ~ Literal ~> (ast.FunctionCaller(_, _))) |
         (capture(OperatorName) ~ Whitespace ~ Expression ~> (ast.FunctionCaller(_, _))) |
-        (capture(FunctionName) ~ Whitespace ~ ("(" | "") ~ (Expression * (',' ~ Whitespace)) ~ (")" | "") ~> (ast.FunctionCaller(_: String, _: Seq[ast.Expression])))
+        (capture(FunctionName) ~ Whitespace ~ (Expression * (',' ~ Whitespace)) ~> (ast.FunctionCaller(_: String, _: Seq[ast.Expression]))) |
+        "(" ~ (Expression + (',' ~ Whitespace)) ~ ")" ~> (ast.FunctionCaller("", _: Seq[ast.Expression]))
     }
 
     def CompilerHint = rule { "#[" ~ capture(oneOrMore(CharPredicate.AlphaNum)) ~ ']' ~ Whitespace ~ (('<' ~ capture(oneOrMore(CharPredicate.AlphaNum)) ~ '>') * Whitespace) ~> (hint(_, _)) }
+
+    def Block = rule { '{' ~ Whitespace ~ zeroOrMore(Expression ~ ';' ~ Whitespace) ~ '}' ~> (ast.Block(_)) }
 }
