@@ -8,7 +8,7 @@ package object VStringPrelude extends Prelude {
     object VStringPlus extends VMacro("+") {
         def eval(callee: Expression, args: Seq[Expression]) =
             require(args, Seq(VString)) {
-                GenericExpression(VString, callee.eval + " + " + args.map(_.eval).mkString(" + "))
+                GenericExpression(VString, callee.eval + " . " + args.map(_.eval).mkString(" . "))
             }
     }
 
