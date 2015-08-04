@@ -1,6 +1,6 @@
 package org.vegas
 
-import org.vegas.compiler.{Compiler, CompilerOptions, FileReader, FileWriter, PassThru, StdOut}
+import org.vegas.compiler.{Compiler, FileReader, FileWriter, PassThru, StdOut}
 import org.vegas.compiler.{StringLoader, StringUnloader}
 import org.vegas.compiler.ApplyCompiler
 import org.vegas.compiler.BracesCompiler
@@ -13,7 +13,7 @@ import org.vegas.vtype.ast
 object vegasc extends App {
     val version = "0.0.0"
 
-    val options = CompilerOptions(args)
+    val options = ProgramOptions(args)
                   .alias("v", "version")
                   .description("version", "Prints the version number")
                   .alias("h", "help")

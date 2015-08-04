@@ -1,8 +1,8 @@
-package org.vegas.compiler
+package org.vegas
 
 import scala.collection.mutable.Map
 
-case class CompilerOptions(val args: Array[String]) {
+case class ProgramOptions(val args: Array[String]) {
     val shortFlag = """-(\w)"""
     val longFlag = """--([\w-]+)"""
 
