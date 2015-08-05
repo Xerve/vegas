@@ -9,12 +9,16 @@ class StageNParser(val input: ParserInput) extends Parser {
     def Program = rule { Whitespace ~ oneOrMore(Expression ~ ";" ~ Whitespace) ~ EOI }
 
     def Expression: Rule1[ast.Expression] = rule {
-        (quiet('(') ~ Whitespace ~ Expression ~ Whitespace ~ quiet(')')) |
+        ParenExpression |
         //CompilerHint |
         FunctionCall |
         Block |
         Literal |
         Binding
+    }
+
+    def ParenExpression = rule {
+        quiet('(') ~ Whitespace ~ Expression ~ Whitespace ~ quiet(')')
     }
 
     def Literal = rule {
@@ -94,7 +98,7 @@ class StageNParser(val input: ParserInput) extends Parser {
     }
 
     def FunctionCaller: Rule1[ast.FunctionCaller] = rule {
-        //(capture(OperatorName) ~ Whitespace ~ Literal ~> (ast.FunctionCaller(_, _))) |
+        (capture(OperatorName) ~ Whitespace ~ Literal ~> (ast.FunctionCaller(_, _))) |
         (capture(OperatorName) ~ Whitespace ~ Expression ~> (ast.FunctionCaller(_, _))) |
         (capture(FunctionName) ~ Whitespace ~ (Expression * (',' ~ Whitespace)) ~> (ast.FunctionCaller(_: String, _: Seq[ast.Expression])))
     }
