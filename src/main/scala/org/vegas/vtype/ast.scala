@@ -48,7 +48,7 @@ case class FunctionCall(val callee: Expression, val functions: Seq[FunctionCalle
 
 case class Binding(val pattern: Pattern, val expression: Expression) extends Expression {
     def eval = pattern decompose expression
-    val vtype = VAny
+    val vtype = expression.vtype
 }
 
 abstract class Pattern extends Expression {

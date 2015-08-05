@@ -30,8 +30,10 @@ object vegasc extends App {
         def c(compiler: Compiler, switch: String) =
             if (options hasFlag "--just") {
                 if (options hasFlag "--" + switch) compiler else PassThru
+            } else if (options hasFlag "--no") {
+                if (options hasFlag "--" + switch) PassThru else compiler
             } else {
-                if (options hasFlag "--no-" + switch) PassThru else compiler
+                compiler
             }
 
         FileReader(filename) >>:

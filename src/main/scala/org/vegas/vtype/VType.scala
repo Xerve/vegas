@@ -8,8 +8,8 @@ abstract class VMacro(val name: String) {
     def eval(callee: Expression, args: Seq[Expression]): Expression
 
     def require(args: Seq[Expression], validator: Seq[VType])(callback: => Expression) =
-        validator zip args forall { case(argType, arg) =>
-            argType isCompatibleWith arg.vtype
+        validator zip args forall { case (argType, arg) =>
+            println(name, argType, arg.vtype);argType isCompatibleWith arg.vtype
         } match {
             case true => callback
             case false => new NullExpression()
@@ -19,13 +19,10 @@ abstract class VMacro(val name: String) {
 }
 
 case class GenericVMacro(override val name: String,
-                         val function: (Expression, Seq[Expression]) => Expression,
-                         val validator: Seq[VType] = Seq())
+                         val function: (Expression, Seq[Expression]) => Expression)
                          extends VMacro(name) {
     def eval(callee: Expression, args: Seq[Expression]) =
-        require(args, validator) {
-            function(callee, args)
-        }
+        function(callee, args)
 }
 
 abstract class VType {
