@@ -40,16 +40,21 @@ class StageNParser(val input: ParserInput) extends Parser {
     def Identifier = rule {
         !(ch('"') ~ ANY) ~
         !Keyword ~
-        CharPredicate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_") ~
-        zeroOrMore(CharPredicate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_"))
+        (OperatorCharacter |
+        (CharPredicate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_") ~
+        zeroOrMore(CharPredicate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_"))))
     }
 
     def FunctionName = rule {
         oneOrMore(CharPredicate("$ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_"))
     }
 
+    def OperatorCharacter = rule {
+        CharPredicate(".<>*&%+-|?:/")
+    }
+
     def OperatorName = rule {
-        oneOrMore(CharPredicate(".<>*&%+-|?:"))
+        oneOrMore(OperatorCharacter)
     }
 
     def Whitespace = rule { quiet(zeroOrMore(CharPredicate(" \n\r\t\f"))) }
@@ -99,6 +104,7 @@ class StageNParser(val input: ParserInput) extends Parser {
 
     def FunctionCaller: Rule1[ast.FunctionCaller] = rule {
         (capture(OperatorName) ~ Whitespace ~ Literal ~> (ast.FunctionCaller(_, _))) |
+        (capture(OperatorName) ~> (ast.FunctionCaller(_, new ast.NullExpression()))) |
         (capture(OperatorName) ~ Whitespace ~ Expression ~> (ast.FunctionCaller(_, _))) |
         (capture(FunctionName) ~ Whitespace ~ (Expression * (',' ~ Whitespace)) ~> (ast.FunctionCaller(_: String, _: Seq[ast.Expression])))
     }

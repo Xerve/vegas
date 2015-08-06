@@ -39,7 +39,6 @@ object vegasc extends App {
         FileReader(filename) >>:
         c(StringLoader(), "strings") >>:
         c(ApplyCompiler(), "apply") >>:
-        c(CommentCompiler(), "comment") >>:
         c(BracesCompiler(), "braces") >>:
         c(SemicolonCompiler(), "semicolons") >>:
         c(StringUnloader(), "strings") >>:

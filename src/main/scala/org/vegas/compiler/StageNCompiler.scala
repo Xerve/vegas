@@ -14,6 +14,7 @@ class StageNCompiler extends Compiler {
             case Failure(error) =>
                 println("Unexpected error" + error.getMessage)
                 None
+            case _ => None
         }
 }
 

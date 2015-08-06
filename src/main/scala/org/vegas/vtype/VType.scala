@@ -1,8 +1,7 @@
 package org.vegas.vtype
 
 import org.vegas.vtype.ast.{Expression, NullExpression}
-import scala.collection.mutable.Map
-import scala.collection.mutable.MutableList
+import scala.collection.mutable.{Map, MutableList}
 
 abstract class VMacro(val name: String) {
     def eval(callee: Expression, args: Seq[Expression]): Expression
