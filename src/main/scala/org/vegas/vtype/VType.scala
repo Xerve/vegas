@@ -9,7 +9,7 @@ abstract class VMacro(val name: String) {
 
     def require(args: Seq[Expression], validator: Seq[VType])(callback: => Expression) =
         validator zip args forall { case (argType, arg) =>
-            println(name, argType, arg.vtype);argType isCompatibleWith arg.vtype
+            argType isCompatibleWith arg.vtype
         } match {
             case true => callback
             case false => new NullExpression()
