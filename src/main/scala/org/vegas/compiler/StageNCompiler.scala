@@ -1,13 +1,16 @@
 package org.vegas.compiler
 
-import org.vegas.vtype.ast
+import org.vegas.vtype.{ast, VComment}
 import org.parboiled2.ParseError
 import scala.util.{Success, Failure}
 
 class StageNCompiler extends Compiler {
     def compile(source: String) =
         new StageNParser(source).Program.run() match {
-            case Success(result) => { Some("<?php\n" + result.foldLeft("") { (body, expression) => body + expression.eval + ";\n" }) }
+            case Success(result) =>
+                Some("<?php\n" + result.foldLeft("") { (body, expression) =>
+                    body + expression.eval + (if (expression.vtype != VComment) ";\n" else "\n")
+                })
             case Failure(error: ParseError) =>
                 println("Compilation failed with error:\n" + error.format(source))
                 None

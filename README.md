@@ -6,41 +6,30 @@
 
 A language that compiles to PHP lol
 
-Now with compile-time macros!
+Now with type-dependant macros!
 
 ## Examples
 
 ```
+// "Notice how comments are interpreted too"
 let a = 0
-print a
-```
 
-```
-let myArray = [1, 2, 4]
-let [a, b] = myArray
-```
+// "Inline comments are not allowed"
+let b = 3
 
-```
-let m = if on then "ayy lmao" else "rawr"
+// "The compiler determines the type of `c` to be `Number`"
+let c = a + b
 
-let k = 17
-k = 0 # ERROR! IMMUTIBILITY!
+/**
+/* "The syntax for calling PHP functions is similar"
+/* "to Rust's macro syntax"
+print!(a)
 
-let mut r = 17
-r = 0 # No error, declared immutable
-```
+// "Immutability is enforced, these statements error"
+let d = "jim"
+let d = "pam"
 
-# Developing
-
-To build the compiler run
-
-```
-sbt assembly
-mv target/scala-2.11/vegasc-assembly-1.0.jar ./vegasc
-```
-
-and then run with
-
-```
-java -jar vegasc
+// "Mutable variables"
+let mut e = "dwight"
+let e = "ryan"
 ```

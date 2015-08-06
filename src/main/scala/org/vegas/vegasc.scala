@@ -13,6 +13,8 @@ object vegasc extends App {
                   .description("version", "Prints the version number")
                   .alias("h", "help")
                   .description("help", "Prints help")
+                  .description("stdout", "Print output, rather than in a file")
+                  .description("debug", "Print internal compiler information")
 
     Prelude.init
 

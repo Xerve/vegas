@@ -58,11 +58,12 @@ case class ProgramOptions(val name: String, val version: String, val args: Array
     def hasFlag(flag: String) = flags contains flag
 
     def printHelp { println(
+        s"$name $version\n" +
         "Usage:\n" +
         descriptions.map { case (flag, text) =>
-            (if (reverseAliases contains flag) ("    -" + reverseAliases.get(flag).get + "\n") else "") +
+            //(if (reverseAliases contains flag) ("    -" + reverseAliases.get(flag).get + "\n") else "") +
             "    --" + flag + "\n" +
-            "        " + text + "\n"
+            "        " + text + "\n\n"
         }.mkString
     )}
 

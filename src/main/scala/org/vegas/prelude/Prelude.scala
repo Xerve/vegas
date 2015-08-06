@@ -9,6 +9,7 @@ object Prelude {
         VAnyPrelude.init
         VNumberPrelude.init
         VStringPrelude.init
+        VCommentPrelude.init
         VegasPrelude.init
     }
 }

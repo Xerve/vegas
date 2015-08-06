@@ -99,6 +99,12 @@ object Vegas extends VType {
     def unapply(sample: String) = None
 }
 
+object VComment extends VType {
+    val parent = None
+    val typename = "Comment"
+    def unapply(sample: String) = None
+}
+
 object VNumber extends VType {
     val parent = Some(VAny)
     val typename = "Number"
