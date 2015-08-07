@@ -23,6 +23,7 @@ let c = a + b
 /**
 /* "The syntax for calling PHP functions is similar"
 /* "to Rust's macro syntax"
+/*
 print!(a)
 
 // "Immutability is enforced, these statements error"
