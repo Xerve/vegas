@@ -1,5 +1,7 @@
 package org.vegas.compiler
 
+import org.vegas.log
+
 class BracesCompiler extends Compiler {
     def compile(source: String) = {
         val (_, program) = (source + "\n\n").lines.foldLeft(Tuple2(0, "")) ({ (program, line) =>
@@ -11,7 +13,7 @@ class BracesCompiler extends Compiler {
                 case x if x == bodyIndentation + 1 => body + " {\n" + line
                 case x if x < bodyIndentation => body + "\n" + (" " * (4 * lineIndentation)) + "}\n" + line
                 case x if x == bodyIndentation => body + "\n" + line
-                case _ => println("Impropper indentation detected!"); "ERROR"
+                case _ => throw new exception.UnexpectedIndentationException("Unexpected indentation!")
             })
         })
 

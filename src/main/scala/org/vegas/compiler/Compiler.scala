@@ -2,7 +2,8 @@ package org.vegas.compiler
 
 import java.io.{PrintWriter, File}
 import scala.collection.mutable.Queue
-import org.vegas.vegasc
+import scala.util.Try
+import org.vegas.{log, vegasc}
 import org.vegas.vtype.Scope
 
 abstract class Compiler {
@@ -37,7 +38,10 @@ trait StaticCompiler {
 }
 
 sealed class CompilerPipeline(stage1: Compiler, stage2: Compiler) extends Compiler {
-    def compile(source: String) = stage1.compile(source).fold[Option[String]](None)(stage2.compile(_))
+    def compile(source: String) = Try(stage1.compile(source).fold[Option[String]](None)(stage2.compile(_))) recover {
+        case err: exception.VegasException => log(err.msg); None
+        case err => log(err.getClass.toString); None
+    } getOrElse None
 }
 
 case class FileReader(val filename: String) extends Compiler {

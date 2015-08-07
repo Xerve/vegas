@@ -10,7 +10,6 @@ class StageNParser(val input: ParserInput) extends Parser {
 
     def Expression: Rule1[ast.Expression] = rule {
         ParenExpression |
-        //CompilerHint |
         FunctionCall |
         Block |
         Literal |
@@ -108,8 +107,6 @@ class StageNParser(val input: ParserInput) extends Parser {
         (capture(OperatorName) ~ Whitespace ~ Expression ~> (ast.FunctionCaller(_, _))) |
         (capture(FunctionName) ~ Whitespace ~ (Expression * (',' ~ Whitespace)) ~> (ast.FunctionCaller(_: String, _: Seq[ast.Expression])))
     }
-
-    //def CompilerHint = rule { "#[" ~ capture(oneOrMore(CharPredicate.AlphaNum)) ~ ']' ~ Whitespace ~ (('<' ~ capture(oneOrMore(CharPredicate.AlphaNum)) ~ '>') * Whitespace) ~> (ast.hint(_, _)) }
 
     def Block = rule { '{' ~ Whitespace ~ zeroOrMore(Expression ~ ';' ~ Whitespace) ~ '}' ~> (ast.Block(_)) }
 }
