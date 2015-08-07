@@ -30,23 +30,11 @@ case class ProgramOptions(val name: String, val version: String, val args: Array
         case argument :: tail => (None -> Some(argument)) :: parseFlags(tail)
     }
 
-    val aliases: Map[String, String] = Map()
-    val reverseAliases: Map[String, String] = Map()
-    val defaults: Map[String, String] = Map()
     val descriptions: Map[String, String] = Map()
 
     protected def chain(f: => Unit) = {
         f
         this
-    }
-
-    def alias(short: String, long: String) = chain {
-        aliases += (short -> long)
-        reverseAliases += (long -> short)
-    }
-
-    def default(flag: String, value: String) = chain {
-        defaults += (flag -> value)
     }
 
     def description(flag: String, desc: String) = chain {

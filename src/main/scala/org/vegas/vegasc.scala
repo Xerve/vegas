@@ -9,9 +9,7 @@ object vegasc extends App {
     val version = "0.1.0"
 
     val options = ProgramOptions(name, version, args)
-                  .alias("v", "version")
                   .description("version", "Prints the version number")
-                  .alias("h", "help")
                   .description("help", "Prints help")
                   .description("stdout", "Print output, rather than in a file")
                   .description("debug", "Print internal compiler information")
