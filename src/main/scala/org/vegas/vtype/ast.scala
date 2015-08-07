@@ -16,6 +16,11 @@ case class GenericExpression(val vtype: VType, val result: String) extends Expre
     def eval = result
 }
 
+trait IfExpression { self: Expression =>
+    val statement: Expression
+    val body: Expression
+}
+
 class NullExpression extends Expression {
     def eval = "null"
     val vtype = VNull
@@ -42,13 +47,12 @@ case class FunctionCall(val callee: Expression, val functions: Seq[FunctionCalle
         })
 
     lazy val vtype = result.vtype
-
     def eval = result.eval
 }
 
 case class Binding(val pattern: Pattern, val expression: Expression) extends Expression {
     def eval = pattern decompose expression
-    val vtype = expression.vtype
+    val vtype = VAny
 }
 
 abstract class Pattern extends Expression {
@@ -121,7 +125,8 @@ case class IdentifierLiteral(val identifier: String, val nonVariable: Boolean = 
 }
 
 case class Block(body: Seq[Expression]) extends Expression {
-    def eval = "{\n" + body.map(_.eval).mkString(";\n") + "\n}"
+    def eval = "{\n" + body.map(_.eval).mkString(";\n") + ";\n}"
+    def simple = body.map(_.eval).mkString(";")
 
     val vtype = VBlock(body.lastOption.map(_.vtype) getOrElse VNull)
 }

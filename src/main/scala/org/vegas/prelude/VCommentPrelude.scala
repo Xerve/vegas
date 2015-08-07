@@ -21,16 +21,18 @@ package object VCommentPrelude {
 
     object VCommentDocblocBody extends VMacro("*") {
         def eval(callee: Expression, args: Seq[Expression]) =
-            if (args.head.vtype == VNull) {
-                GenericExpression(VComment, " */")
-            } else {
-                GenericExpression(VComment, " * " + args.head.eval.stripPrefix("\"").stripSuffix("\""))
+            args match {
+                case Seq(commentBody) if commentBody.vtype != VNull =>
+                    GenericExpression(VComment, " * " + args.head.eval.stripPrefix("\"").stripSuffix("\""))
+                case Seq(commentBody) =>
+                    GenericExpression(VComment, " */")
+                case _ =>
+                    GenericExpression(VComment, "")
             }
     }
 
     def init {
         Compiler.scope.add("$/", Some(VComment))
-
 
         VComment define VCommentComment
         VComment define VCommentDocblocStart

@@ -102,9 +102,10 @@ class StageNParser(val input: ParserInput) extends Parser {
     }
 
     def FunctionCaller: Rule1[ast.FunctionCaller] = rule {
+        '(' ~ Expression ~ ')' ~> (ast.FunctionCaller("$apply", _)) |
         (capture(OperatorName) ~ Whitespace ~ Literal ~> (ast.FunctionCaller(_, _))) |
-        (capture(OperatorName) ~> (ast.FunctionCaller(_, new ast.NullExpression()))) |
         (capture(OperatorName) ~ Whitespace ~ Expression ~> (ast.FunctionCaller(_, _))) |
+        (capture(OperatorName) ~> (ast.FunctionCaller(_, new ast.NullExpression()))) |
         (capture(FunctionName) ~ Whitespace ~ (Expression * (',' ~ Whitespace)) ~> (ast.FunctionCaller(_: String, _: Seq[ast.Expression])))
     }
 

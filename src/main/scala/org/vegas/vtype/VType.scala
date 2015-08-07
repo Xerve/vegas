@@ -144,3 +144,14 @@ case class VBlock(val result: VType) extends VType with Higher {
     val typename = "Block[" + result + "]"
     val args = Seq()
 }
+
+object VConditional extends VType {
+    val parent = Some(VAny)
+    val typename = "Conditional"
+}
+
+case class VIf(val resultType: VType = VAny, val structural: Boolean = true) extends VType with Generic {
+    val parent = Some(VConditional)
+    val typename = "Conditional[" + resultType + "]"
+    val types = Seq(resultType)
+}

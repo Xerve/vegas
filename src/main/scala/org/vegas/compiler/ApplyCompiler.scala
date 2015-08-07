@@ -1,7 +1,7 @@
 package org.vegas.compiler
 
 class ApplyCompiler extends Compiler {
-    val functionCall = """([\w\.\!#]+)\(([\s\S]*?)\)""".r
+    val functionCall = """([\w\.\!]+)\(([\s\S]*?)\)""".r
     val replacementCall = """$1 \$apply ($2)"""
 
     def compile(source: String) =

@@ -21,6 +21,7 @@ object vegasc extends App {
     if (args.isEmpty) options.printHelp else options.arguments foreach (compileFile(_))
 
     if (options hasFlag "--debug") {
+        println("")
         println(Compiler.scope)
         println("")
         println(log)

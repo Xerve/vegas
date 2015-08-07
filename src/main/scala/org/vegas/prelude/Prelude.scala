@@ -10,6 +10,7 @@ object Prelude {
         VNumberPrelude.init
         VStringPrelude.init
         VCommentPrelude.init
+        VConditionalPrelude.init
         VegasPrelude.init
     }
 }
