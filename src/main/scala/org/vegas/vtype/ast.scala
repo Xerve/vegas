@@ -1,7 +1,7 @@
 package org.vegas.vtype.ast
 
 import org.parboiled2.Parser
-import org.vegas.compiler.Compiler
+import org.vegas.compiler.{Compiler, StageNCompiler}
 import org.vegas.vtype._
 import scala.collection.immutable.Seq
 
@@ -14,11 +14,6 @@ abstract class Expression {
 
 case class GenericExpression(val vtype: VType, val result: String) extends Expression {
     def eval = result
-}
-
-trait IfExpression { self: Expression =>
-    val statement: Expression
-    val body: Expression
 }
 
 class NullExpression extends Expression {
@@ -125,8 +120,8 @@ case class IdentifierLiteral(val identifier: String, val nonVariable: Boolean = 
 }
 
 case class Block(body: Seq[Expression]) extends Expression {
-    def eval = "{\n" + body.map(_.eval).mkString(";\n") + ";\n}"
-    def simple = body.map(_.eval).mkString(";")
+    def eval = "{\n" + StageNCompiler.joinExpressions(body) + "}"
+    def simple = StageNCompiler.joinExpressions(body)
 
     val vtype = VBlock(body.lastOption.map(_.vtype) getOrElse VNull)
 }

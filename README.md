@@ -33,4 +33,12 @@ let d = "pam"
 // "Mutable variables"
 let mut e = "dwight"
 let e = "ryan"
+
+let x = true
+if (x):
+    print!("How now, ")
+    if (false):
+        print!("DONKEY!")
+    else:
+        print!("you're an allstar!")
 ```

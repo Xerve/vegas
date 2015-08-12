@@ -11,7 +11,10 @@ class BracesCompiler extends Compiler {
                 case _ if body.trim.endsWith("[") => body + "\n" + line
                 case _ if line.trim.endsWith("]") => body + "\n" + line
                 case x if x == bodyIndentation + 1 => body + " {\n" + line
-                case x if x < bodyIndentation => body + "\n" + (" " * (4 * lineIndentation)) + "} " + line
+                case x if x < bodyIndentation =>
+                    body + "\n" +
+                    bodyIndentation.to(lineIndentation, -1).map(ident => "    " * (ident - 1)).mkString("}\n") +
+                    line
                 case x if x == bodyIndentation => body + "\n" + line
                 case _ => throw new exception.UnexpectedIndentationException("Unexpected indentation!")
             })

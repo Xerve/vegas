@@ -150,8 +150,17 @@ object VConditional extends VType {
     val typename = "Conditional"
 }
 
-case class VIf(val resultType: VType = VAny, val structural: Boolean = true) extends VType with Generic {
+object VIf extends VType {
     val parent = Some(VConditional)
-    val typename = "Conditional[" + resultType + "]"
-    val types = Seq(resultType)
+    val typename = "VIf"
+}
+
+object VElif extends VType {
+    val parent = Some(VConditional)
+    val typename = "VElif"
+}
+
+object VElse extends VType {
+    val parent = Some(VConditional)
+    val typename = "VElse"
 }
