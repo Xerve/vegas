@@ -11,8 +11,10 @@ class Scope {
     val scope = Stack[String]()
     val nodes: Map[String, Node] = Map()
 
+    def scopeName = scope.map(_ + "\\").mkString
+
     def add(_name: String, vtype: Option[VType], assign: Boolean = false, mut: Boolean = false) {
-        val name = _name + scope.mkString("\\")
+        val name = scopeName + _name
         nodes get name match {
             case Some(node) if node.mut && !node.vtype.isEmpty && !isCompatible(node.vtype, vtype) =>
                 log(s"Trying to assign $name with incompatible types", s"${node.vtype} to $vtype")
@@ -47,7 +49,7 @@ class Scope {
     }
 
     def apply(name: String) = {
-        nodes.get(name).orElse(nodes.get(scope.mkString("\\"))).map(_.vtype) getOrElse None
+        nodes.get(name).orElse(nodes.get(scopeName + name)).map(_.vtype) getOrElse None
     }
 
     override def toString =

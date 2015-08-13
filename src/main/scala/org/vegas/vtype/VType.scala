@@ -93,12 +93,6 @@ object VNull extends VType {
     def unapply(sample: String) = if (sample == "null") Some(this) else None
 }
 
-object Vegas extends VType {
-    val parent = None
-    val typename = "Vegas"
-    def unapply(sample: String) = None
-}
-
 object VComment extends VType {
     val parent = None
     val typename = "Comment"
@@ -163,4 +157,23 @@ object VElif extends VType {
 object VElse extends VType {
     val parent = Some(VConditional)
     val typename = "VElse"
+}
+
+object VClassDeclaration extends VType {
+    val parent = None
+    val typename = "VClass"
+}
+
+case class VClassBuilder(className: String = "") extends VType {
+    val parent = Some(VClassDeclaration)
+    val typename = "VClassBuilder[" + className + "]"
+}
+
+object VClassParent extends VType {
+    val parent = None
+    val typename = "VClass"
+}
+
+case class VClass(val typename: String, val inherits: VType = VAny) extends VType {
+    val parent = Some(inherits)
 }

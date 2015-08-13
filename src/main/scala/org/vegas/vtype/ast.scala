@@ -9,7 +9,7 @@ abstract class Expression {
     def eval: String
     val vtype: VType
 
-    def callMacro(macroName: String, args: Seq[Expression]) =  vtype.call(macroName, this, args)
+    def callMacro(macroName: String, args: Seq[Expression]) = vtype.call(macroName, this, args)
 }
 
 case class GenericExpression(val vtype: VType, val result: String) extends Expression {

@@ -33,15 +33,15 @@ class StageNParser(val input: ParserInput) extends Parser {
     def Keyword = rule {
         NullKeyword |
         BooleanKeyword |
-        atomic("let")
+        atomic("val")
     }
 
     def Identifier = rule {
         !(ch('"') ~ ANY) ~
         !Keyword ~
         (OperatorCharacter |
-        (CharPredicate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_") ~
-        zeroOrMore(CharPredicate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_"))))
+        (CharPredicate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_\\") ~
+        zeroOrMore(CharPredicate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_\\"))))
     }
 
     def FunctionName = rule {
@@ -72,7 +72,7 @@ class StageNParser(val input: ParserInput) extends Parser {
 
     def BooleanLiteral = rule { capture(BooleanKeyword) ~> (_.toString) }
 
-    def BooleanKeyword = rule { atomic("true") | atomic("yes") | atomic("on") | atomic("false") | atomic("no") | atomic("off") }
+    def BooleanKeyword = rule { atomic("true") | atomic("false") }
 
     def ArrayLiteral = rule { '[' ~ Whitespace ~ (Expression + (',' ~ Whitespace)) ~ Whitespace ~ ';' ~ Whitespace ~ ']' }
 
@@ -83,7 +83,7 @@ class StageNParser(val input: ParserInput) extends Parser {
     def IdentifierLiteral = rule { capture(Identifier) ~ '!' ~> (ast.IdentifierLiteral(_, nonVariable = true)) |
                                    capture(Identifier) ~> (ast.IdentifierLiteral(_, nonVariable = false))}
 
-    def Binding = rule { atomic("let") ~ Whitespace ~ Pattern ~ Whitespace ~ "=" ~ Whitespace ~ Expression ~> (ast.Binding(_, _)) }
+    def Binding = rule { atomic("val") ~ Whitespace ~ Pattern ~ Whitespace ~ "=" ~ Whitespace ~ Expression ~> (ast.Binding(_, _)) }
 
     def Pattern = rule {
         IdentifierPattern |

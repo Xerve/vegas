@@ -11,6 +11,6 @@ object Prelude {
         VStringPrelude.init
         VCommentPrelude.init
         VConditionalPrelude.init
-        VegasPrelude.init
+        VClassPrelude.init
     }
 }
