@@ -4,10 +4,13 @@ import org.vegas.log
 
 class BracesCompiler extends Compiler {
     def compile(source: String) = {
-        val (_, program) = (source + "\n\n").lines.foldLeft(Tuple2(0, "")) ({ (program, line) =>
+        val precompiled = source.lines.filter(_.trim.nonEmpty) ++ Seq("\n\n")
+
+        val (_, program) = precompiled.foldLeft(0 -> "") { (program, line) =>
             val lineIndentation = (line.indexWhere (_ != ' ') / 4)
             val (bodyIndentation, body) = program
-            Tuple2(lineIndentation, lineIndentation match {
+
+            val nextBody = lineIndentation match {
                 case _ if body.trim.endsWith("[") => body + "\n" + line
                 case _ if line.trim.endsWith("]") => body + "\n" + line
                 case x if x == bodyIndentation + 1 => body + " {\n" + line
@@ -17,8 +20,10 @@ class BracesCompiler extends Compiler {
                     line
                 case x if x == bodyIndentation => body + "\n" + line
                 case _ => throw new exception.UnexpectedIndentationException("Unexpected indentation!")
-            })
-        })
+            }
+
+            lineIndentation -> nextBody
+        }
 
         Some(program.drop(1).trim)
     }

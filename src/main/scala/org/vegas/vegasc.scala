@@ -44,6 +44,7 @@ object vegasc extends App {
         c(SemicolonCompiler(), "semicolons") >>:
         c(StringUnloader(), "strings") >>:
         c(StageNCompiler(), "stageN") >>:
+        c(BeautifyCompiler(), "beaut") >>:
         (if (options hasFlag "--stdout") StdOut else FileWriter(filename))
     }
 }

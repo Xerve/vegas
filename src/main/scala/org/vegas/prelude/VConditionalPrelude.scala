@@ -10,10 +10,10 @@ package object VConditionalPrelude {
             callee.vtype match {
                 case VIf =>
                     GenericExpression(VIf, "if (" + args.map(_.eval).mkString + ") ")
-            
+
                 case VElif => //require(args, Seq(VAny)) {
                     GenericExpression(VElif, "elseif (" + args.map(_.eval).mkString + ") ")
-            
+
                 case _ => println(callee.vtype);new NullExpression()
             }
     }
@@ -23,13 +23,13 @@ package object VConditionalPrelude {
             callee.vtype match {
                 case VIf =>
                     GenericExpression(VAny, callee.eval + args.headOption.map(_.eval).mkString)
-            
+
                 case VElif => //require(args, Seq(VAny)) {
                     GenericExpression(VAny, callee.eval + args.headOption.map(_.eval).mkString)
-            
+
                 case VElse => //require(args, Seq(VAny)) {
-                    GenericExpression(VAny, "else" + args.headOption.map(_.eval).mkString)
-            
+                    GenericExpression(VAny, "else " + args.headOption.map(_.eval).mkString)
+
                 case _ =>
                     new GenericExpression(VAny, callee.eval + args.headOption.map(_.eval).mkString)
             }
